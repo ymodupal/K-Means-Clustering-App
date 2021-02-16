@@ -1,0 +1,36 @@
+{
+  "name": "k-means-clustering-app",
+  "version": "1.0.0",
+  "description": "Playground Application for K-Means Clustering Application",
+  "scripts": {
+    "clean": "rimraf dist",
+    "start": "webpack serve --mode development",
+    "build": "webpack --mode production --config webpack.config.js",
+    "serve": "npx serve dist/",
+    "open": "start http://localhost:5000"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "d3": "^6.5.0",
+    "material-design-lite": "^1.3.0"
+  },
+  "devDependencies": {
+    "@types/d3": "^6.3.0",
+    "concat": "^1.0.3",
+    "concurrently": "^5.3.0",
+    "copyfiles": "^2.4.1",
+    "css-loader": "^5.0.2",
+    "html-webpack-plugin": "^5.1.0",
+    "rimraf": "^3.0.2",
+    "serve": "^11.3.2",
+    "style-loader": "^2.0.0",
+    "ts-loader": "^8.0.17",
+    "tsify": "^5.0.2",
+    "typescript": "^4.1.5",
+    "uglify-js": "^3.12.7",
+    "webpack": "^5.21.2",
+    "webpack-cli": "^4.5.0",
+    "webpack-dev-server": "^3.11.2"
+  }
+}

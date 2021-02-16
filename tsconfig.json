@@ -1,0 +1,25 @@
+{
+	"compilerOptions": {
+		"module": "es2015",
+		"moduleResolution": "node",
+		"outDir": "./dist",
+		"emitDecoratorMetadata": true,
+		"experimentalDecorators": true,
+		"sourceMap": true,
+		"strict": true,
+		// "noUnusedLocals":true,
+		"noImplicitAny": true,
+		"downlevelIteration": true,
+		"target": "es5",
+		"typeRoots": [
+			"node_modules/@types"
+		],
+		"lib": [
+			"es2017",
+			"dom"
+		]
+	},
+	"exclude": [
+		"node_modules"
+	]
+}
