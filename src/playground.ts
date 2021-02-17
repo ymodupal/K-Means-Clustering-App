@@ -33,6 +33,7 @@ export class EntryPoint {
 import './assets/styles.css';
 import * as d3 from 'd3';
 import * as seedrandom from 'seedrandom';
+import { HeatMap } from './heatmap';
 import {
     State,
     datasets,
@@ -65,12 +66,21 @@ import {
     .domain([0, 1])
     .range([-1, 1]);
 
-    const colorScale = d3
+  const colorScale = d3
     .scaleLinear<string, number>()
     .domain([-1, 0, 1])
-    .range(['#f59322', '#e8eaeb', '#0877bd'])
+    //.range(['#f59322', '#e8eaeb', '#0877bd'])
+    .range(['#808B96', '#808B96', '#808B96'])
     .clamp(true);
- 
+  // Plot the main heatmap.
+  const mainHeatMap = new HeatMap(
+    SIDE_LENGTH,
+    DENSITY,
+    xDomain,
+    xDomain,
+    d3.select('#main-heatmap'),
+    { showAxes: true }
+  );
   let options: any;
   let Method: any;
   let data: Example2D[];

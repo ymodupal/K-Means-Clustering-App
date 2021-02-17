@@ -132,13 +132,22 @@ limitations under the License.
                 </button>
             </div>
         </div>
-        <!-- Features Column -->
-        <div class="column features">
-            <h4>Features</h4>
-        </div>
+        
         <!-- Hidden Layers Column -->
         <div class="column hidden-layers">
-            <h4>Inital step</h4>
+           <h4>Cluster initialization</h4>
+           <div class="centroidView" style="display: flex;">
+            <div>
+              <div>Initial Data:</div>
+              <div id="main-heatmap" class="main-viz">
+                <div id="hovercard" class="ui-nvotes">
+                  <div># of votes</div>
+                  <div>class&nbsp;-1:&nbsp;&nbsp;<span id="first-class" class="value"></span></div>
+                  <div>class&nbsp;&nbsp;1:&nbsp;&nbsp;<span id="second-class" class="value"></span></div>
+                </div>
+              </div>
+            </div>
+          </div> 
         </div>
         <!-- Output Column -->
         <div class="column output">
@@ -147,7 +156,7 @@ limitations under the License.
               <div id="linechart"></div>
             </div>
         </div>
-        <a href="#" onclick="showalert()">Test Script</a>
+       <!-- <a href="#" onclick="showalert()">Test Script</a>-->
     </div>
     <!-- Footer -->
     <footer>
