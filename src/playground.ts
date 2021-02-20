@@ -13,22 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
-/*----Test script code Begins---*/
-export class EntryPoint {
-    constructor() {
-        console.log("constructor is called!")
-    }
-
-    showalert() {
-        alert("Success!!");
-    }
-};
-
-(window as any).showalert = function () {
-    let hero = new EntryPoint();
-    hero.showalert();
-};
-/*----Test script code ends ---*/
 
 import './assets/styles.css';
 import * as d3 from 'd3';
@@ -442,11 +426,31 @@ function isLoading(loading: boolean) {
  * @param reset True when called in reset()
  */
 function updateUI(reset = false) {
- 
+  //if (!reset) updateDecisionBoundary();
+  //mainHeatMap.updateBackground(mainBoundary, state.discretize);
+  //for (let i = 0; i < treeHeatMaps.length; i++) {
+  //  treeHeatMaps[i].updateBackground(treeBoundaries[i], state.discretize);
+  //}
+
+  // Metrics table
+  d3.selectAll('.metrics tbody tr').remove();
+  metricList.forEach((metric) => {
+    const row = d3.select('.metrics tbody').append('tr');
+    // First row contains metric name
+    row.append('td')
+      .attr('class', 'mdl-data-table__cell--non-numeric')
+      .text(metric);
+    // Next 2 rows contain train and test metric values
+    row.append('td')
+      .text(trainMetrics ? trainMetrics[metric].toFixed(3) : '0.000');
+    row.append('td')
+      .text(testMetrics ? testMetrics[metric].toFixed(3) : '0.000');
+  });
 }
 
 function updatePoints() {
-  
+  mainHeatMap.updatePoints(trainData);
+  mainHeatMap.updateTestPoints(state.showTestData ? testData : []);
 }
 
 function isClassification() {
@@ -455,3 +459,5 @@ function isClassification() {
 
 drawDatasetThumbnails();
 makeGUI();
+generateData(true);
+reset(true);

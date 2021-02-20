@@ -6,9 +6,9 @@
 		"emitDecoratorMetadata": true,
 		"experimentalDecorators": true,
 		"sourceMap": true,
-		"strict": true,
+		"strict": false,
 		// "noUnusedLocals":true,
-		"noImplicitAny": true,
+		"noImplicitAny": false,
 		"downlevelIteration": true,
 		"target": "es5",
 		"typeRoots": [

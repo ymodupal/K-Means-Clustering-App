@@ -49,12 +49,12 @@ export class HeatMap {
     numSamples: number,
     xDomain: [number, number],
     yDomain: [number, number],
-    container,
+    container: any,
     userSettings?: HeatMapSettings
   ) {
     this.numSamples = numSamples;
     const height = width;
-    const padding = userSettings.showAxes ? 20 : 0;
+    const padding = userSettings!.showAxes ? 20 : 0;
 
     if (userSettings != null) {
       // overwrite the defaults with the user-specified settings.
@@ -77,7 +77,8 @@ export class HeatMap {
     const tmpScale = d3
       .scaleLinear<string, number>()
       .domain([0, 0.5, 1])
-      .range(['#f59322', '#e8eaeb', '#0877bd'])
+      //.range(['#f59322', '#e8eaeb', '#0877bd'])
+      .range(['#808B96', '#808B96', '#808B96'])
       .clamp(true);
 
     // Due to numerical error, we need to specify
@@ -198,7 +199,7 @@ export class HeatMap {
         image.data[++p] = 160;
       }
     }
-    context.putImageData(image, 0, 0);
+    context!.putImageData(image, 0, 0);
   }
 
   private updateCircles(container, points: Example2D[]) {
