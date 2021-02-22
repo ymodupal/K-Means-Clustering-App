@@ -78,8 +78,7 @@ export class State {
     { name: 'percTrainData', type: Type.NUMBER },
     { name: 'problem', type: Type.OBJECT, keyMap: problems },
     { name: 'percSamples', type: Type.NUMBER },
-    { name: 'nTrees', type: Type.NUMBER },
-    { name: 'maxDepth', type: Type.NUMBER }
+    { name: 'clusters', type: Type.NUMBER}
   ];
 
   [key: string]: any;
@@ -92,8 +91,7 @@ export class State {
   regDataset: dataset.DataGenerator = dataset.regressPlane;
   seed: string | undefined;
   percSamples = 80;
-  nTrees = 100;
-  maxDepth = 5;
+  clusters = 2;
 
   /**
    * Deserializes the state from the url hash.

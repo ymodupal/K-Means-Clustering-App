@@ -232,10 +232,6 @@ export class HeatMap {
       .style('fill', (d) => this.color(d.label))
       // Update hover cards.
       .on('mouseenter', (event: Event, d: Example2D) => {
-        if (d.voteCounts === undefined) return;
-        if (d.voteCounts.length !== 2) throw new Error(
-          'Vote counts are not valid'
-        );
 
         const container = d3.select('#main-heatmap canvas');
         const coordinates = d3.pointer(event, container.node());
@@ -244,11 +240,6 @@ export class HeatMap {
           .style('left', `${coordinates[0] + 20}px`)
           .style('top', `${coordinates[1]}px`)
           .style('display', 'block');
-
-        d3.select('#hovercard.ui-nvotes #first-class.value')
-          .text(d.voteCounts[0]);
-        d3.select('#hovercard.ui-nvotes #second-class.value')
-          .text(d.voteCounts[1]);
       })
       .on('mouseleave', () => {
         hoverCard.style('display', 'none');
