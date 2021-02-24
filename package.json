@@ -4,7 +4,7 @@
   "description": "Playground Application for K-Means Clustering Application",
   "scripts": {
     "clean": "rimraf dist",
-    "start": "webpack serve --mode development",
+    "start": "webpack serve --mode development --port 5000",
     "build": "webpack --mode production --config webpack.config.js",
     "serve": "npx serve dist/",
     "open": "start http://localhost:5000"

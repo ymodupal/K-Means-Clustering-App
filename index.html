@@ -47,7 +47,7 @@ limitations under the License.
     <div id="top-controls">
         <div class="container l--page">
             <div class="timeline-controls">
-              <button class="basic-button" id="start-button" title="Train & Classify data" style="background: #183d4e; color: white;">
+              <button class="basic-button" id="start-button" title="Train & Classify data">
                 <span class="value"></span>
               </button>
             </div>
@@ -130,21 +130,19 @@ limitations under the License.
             <div>
               <div>Initial Data:</div>
               <div id="main-heatmap" class="main-viz">
-                <div id="hovercard" class="ui-nvotes">
-                  <!--<div># of votes</div>-->
-                  <div>class&nbsp;-1:&nbsp;&nbsp;<span id="first-class" class="value"></span></div>
-                  <div>class&nbsp;&nbsp;1:&nbsp;&nbsp;<span id="second-class" class="value"></span></div>
-                </div>
               </div>
             </div>
           </div> 
         </div>
         <!-- Output Column -->
         <div class="column output">
-            <h4>Output</h4>
-            <div class="metrics">
-              <div id="linechart"></div>
-            </div>
+          <div class="clusterView" style="display: flex;">
+            <div>
+              <h4>Output</h4>
+              <div id="output-heatmap" class="output-viz">
+              </div>
+          </div>
+          </div>
         </div>
        <!-- <a href="#" onclick="showalert()">Test Script</a>-->
     </div>

@@ -28,7 +28,7 @@ import {
   } from './state';
 import { DataGenerator, Example2D, shuffle, isValid } from './dataset';
 import * as utils from './utils';
-
+import kmeans from 'ml-kmeans';
 
 const NUM_SAMPLES_CLASSIFY = 400;
 const NUM_SAMPLES_REGRESS = 800;
@@ -57,7 +57,7 @@ const colorScale = d3
     //.range(['#f59322', '#e8eaeb', '#0877bd'])
     .range(['#808B96', '#808B96', '#808B96'])
     .clamp(true);
-  // Plot the main heatmap.
+// Plot the main heatmap.
 const mainHeatMap = new HeatMap(
     SIDE_LENGTH,
     DENSITY,
@@ -65,6 +65,15 @@ const mainHeatMap = new HeatMap(
     xDomain,
     d3.select('#main-heatmap'),
     { showAxes: true }
+);
+// Plot the main heatmap.
+const outputHeatMap = new HeatMap(
+  SIDE_LENGTH,
+  DENSITY,
+  xDomain,
+  xDomain,
+  d3.select('#output-heatmap'),
+  { showAxes: true }
 );
 
 let options: any;
@@ -77,7 +86,6 @@ let metricList = [];
 let getMetrics: (yPred: number[], yTrue: number[]) => any;
 let trainMetrics;
 let testMetrics;
-
 
 
 /**
@@ -93,10 +101,15 @@ function makeGUI() {
     centroidIndexes.forEach(i => {
       centroidArray.push(trainData[i]);
     });
-   const kmeans = require('ml-kmeans');
+
+    let inputData = get2dArray(trainData);
+    let noOfClusters = parseInt(state.clusters.toString());
+    let seedForKmeans = utils.getRandomInt(0,trainData.length-1);
+    console.log('Clusters = '+noOfClusters + ', Seed = ' + seedForKmeans);
+
     //let centers = d3.select('#clusterCount').value();
-    let ans = kmeans(trainData, state.clusters, 
-      { seed: utils.getRandomInt(0,trainData.length-1), initialization: 'kmeans++'});
+    let ans = kmeans(inputData, noOfClusters, 
+      { seed: seedForKmeans});
     console.log(ans);
     
   //deleted train worker logic.
@@ -276,6 +289,19 @@ function makeGUI() {
     .call(xAxis);
 }
 
+// 
+function get2dArray(dataArray: Example2D[]) {
+  if(dataArray != null && dataArray != undefined) {
+    var resultMatrix: Number[][] = [];
+    dataArray.forEach((i) => {
+      resultMatrix.push([i.x, i.y]);
+    });
+    return resultMatrix;
+  }
+  return null;
+}
+
+
 function drawDatasetThumbnails() {
     const renderThumbnail = (canvas: any, dataGenerator: DataGenerator) => {
       const w = 100;
@@ -401,8 +427,10 @@ function isLoading(loading: boolean) {
       .style('opacity', loading ? 0.2 : 1);
     d3.selectAll('.tree-heatmaps-container canvas')
       .style('opacity', loading ? 0.2 : 1);
-    d3.selectAll('*')
-      .style('cursor', loading ? 'progress' : 'null');
+    d3.select('#output-heatmap canvas')
+      .style('opacity', loading ? 0.2 : 1);
+    d3.select('#output-heatmap svg')
+      .style('opacity', loading ? 0.2 : 1); 
 }
 
 /**
@@ -430,6 +458,7 @@ function updateUI(reset = false) {
 function updatePoints() {
   mainHeatMap.updatePoints(trainData);
   mainHeatMap.updateTestPoints(state.showTestData ? testData : []);
+  outputHeatMap.updatePoints(trainData);
 }
 
 function isClassification() {
