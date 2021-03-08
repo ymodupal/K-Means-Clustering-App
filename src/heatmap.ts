@@ -26,6 +26,8 @@ export interface HeatMapSettings {
 /** Number of different shades (colors) when drawing a gradient heatmap */
 const NUM_SHADES = 30;
 
+const colorsPreset = ['#f59322', '#0877bd', '#c27ba0', '#8e7cc3', '#6d9eeb', '#76a5af', '#93c47d', '#f6b26b'];
+
 /**
  * Draws a heatmap using canvas. Used for showing the learned decision
  * boundary of the classification algorithm. Can also draw data points
@@ -43,6 +45,7 @@ export class HeatMap {
   private color;
   private canvas;
   private svg;
+  private isClusteredData: boolean;
 
   constructor(
     width: number,
@@ -55,6 +58,8 @@ export class HeatMap {
     this.numSamples = numSamples;
     const height = width;
     const padding = userSettings!.showAxes ? 20 : 0;
+
+    this.isClusteredData = false;
 
     if (userSettings != null) {
       // overwrite the defaults with the user-specified settings.
@@ -76,9 +81,8 @@ export class HeatMap {
     // Get a range of colors.
     const tmpScale = d3
       .scaleLinear<string, number>()
-      .domain([0, 0.5, 1])
-      //.range(['#f59322', '#e8eaeb', '#0877bd'])
-      .range(['#808B96', '#808B96', '#808B96'])
+      .domain([0, 1])
+      .range(['#808B96', '#808B96'])
       .clamp(true);
 
     // Due to numerical error, we need to specify
@@ -229,7 +233,11 @@ export class HeatMap {
       // Update points to be in the correct position.
       .attr('cx', (d: Example2D) => this.xScale(d.x))
       .attr('cy', (d: Example2D) => this.yScale(d.y))
-      .style('fill', (d) => this.color(d.label))
+      .style('fill', (d) => { 
+        //console.log(d.cluster);
+        //console.log(colorsPreset[d.cluster]);
+        return this.isClusteredData ? colorsPreset[d.cluster] : '#808B96' 
+      })
       // Update hover cards.
       .on('mouseenter', (event: Event, d: Example2D) => {
 
@@ -248,4 +256,24 @@ export class HeatMap {
     // Remove points if the length has gone down.
     selection.exit().remove();
   }
+
+  public setColorScale(){
+    
+    this.isClusteredData = true;
+    
+    // let tmpScaleNew = d3
+    // .scaleOrdinal<number, string>()
+    // .domain(domainRange)
+    // .range(colorRange);
+
+    // let colors = d3
+    //   .range(0, 1 + 1e-9, 1 / NUM_SHADES)
+    //   .map((a) => tmpScaleNew(a));
+
+    // this.color = d3
+    //   .scaleOrdinal<number, string>()
+    //   .domain(domainRange)
+    //   .range(colors);
+  }
+  
 } // Close class HeatMap.

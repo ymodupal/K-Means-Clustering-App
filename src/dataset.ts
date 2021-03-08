@@ -24,6 +24,7 @@ export type Example2D = {
   x: number;
   y: number;
   label: number;
+  cluster: number;
 };
 
 export type Point = {
@@ -102,7 +103,8 @@ Example2D[] {
     for (let i = 0; i < numSamples / 2; i++) {
       const x = normalRandom(cx, variance);
       const y = normalRandom(cy, variance);
-      points.push({ x, y, label });
+      const cluster: number = 0;
+      points.push({ x, y, label, cluster });
     }
   }
 
@@ -122,7 +124,8 @@ Example2D[] {
       const t = 1.75 * i / n * 2 * Math.PI + deltaT;
       const x = r * Math.sin(t) + randUniform(-1, 1) * noise;
       const y = r * Math.cos(t) + randUniform(-1, 1) * noise;
-      points.push({ x, y, label });
+      const cluster: number = 0;
+      points.push({ x, y, label, cluster });
     }
   }
 
@@ -151,7 +154,8 @@ Example2D[] {
         { x: x + noiseX, y: y + noiseY },
         { x: 0, y: 0 },
       );
-      points.push({ x, y, label });
+      const cluster: number = 0;
+      points.push({ x, y, label, cluster });
     }
   }
 
@@ -179,8 +183,9 @@ Example2D[] {
     const noiseX = randUniform(-radius, radius) * noise;
     const noiseY = randUniform(-radius, radius) * noise;
     const label = getXORLabel({ x: x + noiseX, y: y + noiseY });
-
-    points.push({ x, y, label });
+    const cluster: number = 0;
+    
+    points.push({ x, y, label, cluster });
   }
 
   return points;
@@ -201,7 +206,8 @@ export function regressPlane(numSamples: number, noise: number): Example2D[] {
     const noiseX = randUniform(-radius, radius) * noise;
     const noiseY = randUniform(-radius, radius) * noise;
     const label = getLabel(x + noiseX, y + noiseY);
-    points.push({ x, y, label });
+    const cluster: number = 0;
+    points.push({ x, y, label, cluster });
   }
   return points;
 }
@@ -243,7 +249,8 @@ export function regressGaussian(
     const noiseX = randUniform(-radius, radius) * noise;
     const noiseY = randUniform(-radius, radius) * noise;
     const label = getLabel(x + noiseX, y + noiseY);
-    points.push({ x, y, label });
+    const cluster: number = 0;
+    points.push({ x, y, label, cluster });
   }
 
   return points;

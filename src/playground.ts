@@ -40,16 +40,10 @@ const NUM_VISIBLE_TREES = 16;
   
 const state = State.deserializeState();
 const xDomain: [number, number] = [-6, 6];
+
+const colorsPreset = ['#e8eaeb', '#0877bd', '#c27ba0', '#8e7cc3', '#6d9eeb', '#76a5af', '#93c47d', '#f6b26b'];
 // Label values must be scaled before and after training since RF impl does not
 // accepts negative values.
-const inputScale = d3
-    .scaleLinear()
-    .domain([-1, 1])
-    .range([0, 1]);
-const outputScale = d3
-    .scaleLinear()
-    .domain([0, 1])
-    .range([-1, 1]);
 
 const colorScale = d3
     .scaleLinear<string, number>()
@@ -57,6 +51,7 @@ const colorScale = d3
     //.range(['#f59322', '#e8eaeb', '#0877bd'])
     .range(['#808B96', '#808B96', '#808B96'])
     .clamp(true);
+
 // Plot the main heatmap.
 const mainHeatMap = new HeatMap(
     SIDE_LENGTH,
@@ -66,6 +61,7 @@ const mainHeatMap = new HeatMap(
     d3.select('#main-heatmap'),
     { showAxes: true }
 );
+
 // Plot the main heatmap.
 const outputHeatMap = new HeatMap(
   SIDE_LENGTH,
@@ -112,7 +108,13 @@ function makeGUI() {
       { seed: seedForKmeans});
     console.log(ans);
     
-  //deleted train worker logic.
+    setClusterIndexes(ans.clusters);
+    
+    outputHeatMap.setColorScale();
+    outputHeatMap.updatePoints(trainData);
+
+    //deleted train worker logic.
+    isLoading(false);
   });
 
   let centers = d3.select("#clusterCount").on("change", function() {
@@ -463,6 +465,14 @@ function updatePoints() {
 
 function isClassification() {
     return state.problem === Problem.CLASSIFICATION;
+}
+
+function setClusterIndexes(clusters: number[]) {
+  if (!!clusters && trainData.length == clusters.length) {
+    trainData.forEach((val, idx) => {
+      val.cluster = clusters[idx];
+    });
+  }
 }
 
 drawDatasetThumbnails();
