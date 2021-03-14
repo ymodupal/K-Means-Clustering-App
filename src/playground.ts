@@ -106,7 +106,7 @@ function makeGUI() {
     //let centers = d3.select('#clusterCount').value();
     let ans = kmeans(inputData, noOfClusters, 
       { seed: seedForKmeans});
-    console.log(ans);
+    //console.log(ans);
     
     setClusterIndexes(ans.clusters);
     

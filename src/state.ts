@@ -22,7 +22,8 @@ export const datasets: { [key: string]: dataset.DataGenerator } = {
   circle: dataset.classifyCircleData,
   xor: dataset.classifyXORData,
   gauss: dataset.classifyTwoGaussData,
-  spiral: dataset.classifySpiralData
+  spiral: dataset.classifySpiralData,
+  moon: dataset.classifyMoonData
 };
 
 /** A map between dataset names and functions that generate regression data. */

@@ -164,6 +164,38 @@ Example2D[] {
   return points;
 }
 
+export function classifyMoonData(numSamples: number, noise: number):
+Example2D[] {
+  const points: Example2D[] = [];
+  const radius = 5;
+  function getMoonLabel(p: Point, center: Point) {
+    return (dist(p, center) < (radius * 0.5)) ? 1 : -1;
+  }
+  const samples_out = Math.floor(numSamples/2);
+  const samples_in = numSamples - samples_out;
+
+  function genMoon(mean: number, variance: number) {
+    for (let i = 0; i < samples_out; i++) {
+      const r = randUniform(mean, variance);
+      const angle = randUniform(0, Math.PI);
+      const x =  r * Math.sin(angle);
+      const y =  r * Math.cos(angle);
+      const noiseX = randUniform(-radius, radius) * noise;
+      const noiseY = randUniform(-radius, radius) * noise;
+      const label = getMoonLabel(
+        { x: x + noiseX, y: y + noiseY },
+        { x: 0, y: 0 },
+      );
+      const cluster: number = 0;
+      points.push({ x, y, label, cluster });
+    }
+  }
+
+  genMoon(-radius, -radius * 0.5);
+  //genMoon(radius * 0.7, radius);
+  return points;
+}
+
 export function classifyXORData(numSamples: number, noise: number):
 Example2D[] {
   const points: Example2D[] = [];
