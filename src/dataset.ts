@@ -34,7 +34,7 @@ export type Point = {
 
 const schema: Schema = {
   type: 'array',
-  maxItems: 1000,
+  maxItems: 1500,
   items: {
     type: 'object',
     required: ['x', 'y', 'label'],
@@ -146,8 +146,8 @@ Example2D[] {
     for (let i = 0; i < numSamples / 2; i++) {
       const r = randUniform(mean, variance);
       const angle = randUniform(0, 2 * Math.PI);
-      const x = r * Math.sin(angle);
-      const y = r * Math.cos(angle);
+      const x = r * Math.cos(angle);
+      const y = r * Math.sin(angle);
       const noiseX = randUniform(-radius, radius) * noise;
       const noiseY = randUniform(-radius, radius) * noise;
       const label = getCircleLabel(
@@ -167,32 +167,67 @@ Example2D[] {
 export function classifyMoonData(numSamples: number, noise: number):
 Example2D[] {
   const points: Example2D[] = [];
-  const radius = 5;
+  const radius = 3.8;
   function getMoonLabel(p: Point, center: Point) {
     return (dist(p, center) < (radius * 0.5)) ? 1 : -1;
   }
   const samples_out = Math.floor(numSamples/2);
   const samples_in = numSamples - samples_out;
 
-  function genMoon(mean: number, variance: number) {
+  function genUpperMoon(mean: number, variance: number) {
     for (let i = 0; i < samples_out; i++) {
-      const r = randUniform(mean, variance);
-      const angle = randUniform(0, Math.PI);
-      const x =  r * Math.sin(angle);
-      const y =  r * Math.cos(angle);
-      const noiseX = randUniform(-radius, radius) * noise;
-      const noiseY = randUniform(-radius, radius) * noise;
+      const r = randUniform(mean, variance); // * 0.x make it smaller in width
+      const angle = randUniform(1, Math.PI + 1.9); 
+      const x =  r * Math.sin(angle) - 1.2;  // + values move the moon to right
+      const y =  r * Math.cos(angle) - 0.5; // negative values move the half circle down
       const label = getMoonLabel(
-        { x: x + noiseX, y: y + noiseY },
+        { x: x, y: y },
         { x: 0, y: 0 },
       );
       const cluster: number = 0;
       points.push({ x, y, label, cluster });
     }
   }
+  function genLowerMoon(mean: number, variance: number) {
+    for (let i = 0; i < samples_in; i++) {
+      const r = randUniform(mean, variance);
+      const angle = randUniform(1.1, Math.PI + 2.1);
+      const x =  r * Math.sin(angle) + 1.5;
+      const y =  r * Math.cos(angle) - 1.5;
+      const label = getMoonLabel(
+        { x: x, y: y },
+        { x: 0, y: 0 },
+      );
+      const cluster: number = 0;
+      points.push({ x, y, label, cluster });
+    }
+  }
+  genUpperMoon(-radius, -radius * (0.8 - noise));
+  genLowerMoon(radius, radius * (0.8 - noise));
+  return points;
+}
 
-  genMoon(-radius, -radius * 0.5);
-  //genMoon(radius * 0.7, radius);
+export function classifyAnisoData(numSamples: number, noise: number):
+Example2D[] {
+  const points: Example2D[] = [];
+
+  const varianceScale = d3
+    .scaleLinear()
+    .domain([0, 0.5])
+    .range([0.5, 4]);
+  const variance = varianceScale(noise);
+
+  function genAniso(cx: number, cy: number, label: number) {
+    for (let i = 0; i < numSamples / 2; i++) {
+      const x = normalRandom(cx, variance);
+      const y = normalRandom(cy, variance);
+      const cluster: number = 0;
+      points.push({ x, y, label, cluster });
+    }
+  }
+
+  genAniso(2, 2, 1); // Gaussian with positive examples.
+  genAniso(-2, -2, -1); // Gaussian with negative examples.
   return points;
 }
 

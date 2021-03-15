@@ -22,9 +22,7 @@ import {
     State,
     datasets,
     regDatasets,
-    problems,
     getKeyFromValue,
-    Problem
   } from './state';
 import { DataGenerator, Example2D, shuffle, isValid } from './dataset';
 import * as utils from './utils';
@@ -36,7 +34,6 @@ const NUM_SAMPLES_REGRESS = 800;
 const SIDE_LENGTH = 300;
 // # of points per direction.
 const DENSITY = 50;
-const NUM_VISIBLE_TREES = 16;
   
 const state = State.deserializeState();
 const xDomain: [number, number] = [-6, 6];
@@ -72,17 +69,10 @@ const outputHeatMap = new HeatMap(
   { showAxes: true }
 );
 
-let options: any;
-let Method: any;
 let data: Example2D[];
 let uploadedData: Example2D[];
-let trainData: Example2D[];
 let testData: Example2D[];
 let metricList = [];
-let getMetrics: (yPred: number[], yTrue: number[]) => any;
-let trainMetrics;
-let testMetrics;
-
 
 /**
  * Prepares the UI on startup.
@@ -91,16 +81,16 @@ function makeGUI() {
   d3.select('#start-button').on('click', () => {
     isLoading(true);
     
-    let centroidIndexes = utils.randArray(0, trainData.length-1, state.clusters);
+    let centroidIndexes = utils.randArray(0, testData.length-1, state.clusters);
 
     let centroidArray = [];
     centroidIndexes.forEach(i => {
-      centroidArray.push(trainData[i]);
+      centroidArray.push(testData[i]);
     });
 
-    let inputData = get2dArray(trainData);
+    let inputData = get2dArray(testData);
     let noOfClusters = parseInt(state.clusters.toString());
-    let seedForKmeans = utils.getRandomInt(0,trainData.length-1);
+    let seedForKmeans = utils.getRandomInt(0,testData.length-1);
     console.log('Clusters = '+noOfClusters + ', Seed = ' + seedForKmeans);
 
     //let centers = d3.select('#clusterCount').value();
@@ -111,15 +101,14 @@ function makeGUI() {
     setClusterIndexes(ans.clusters);
     
     outputHeatMap.setColorScale();
-    outputHeatMap.updatePoints(trainData);
+    outputHeatMap.updatePoints(testData);
 
-    //deleted train worker logic.
     isLoading(false);
   });
 
   let centers = d3.select("#clusterCount").on("change", function() {
    state.clusters = (this as any).value;
-  // state.serialize();
+   state.serialize();
   });
 
   /* Data column */
@@ -192,7 +181,7 @@ function makeGUI() {
     .on('click', () => {
       if (uploadedData.length === 0) return;
       data = uploadedData;
-      [trainData, testData] = splitTrainTest(data);
+      testData = data;
       updatePoints();
       reset();
     });
@@ -219,14 +208,6 @@ function makeGUI() {
   d3.select("label[for='percSamples'] .value")
     .text(state.percSamples);
 
-  const problem = d3.select('#problem').on('change', function () {
-    state.problem = (problems as any)[(this as HTMLSelectElement).value]; //problems[(this as HTMLSelectElement).value];
-    generateData();
-    drawDatasetThumbnails();
-    reset();
-  });
-  problem.property('value', getKeyFromValue(problems, state.problem));
-
   const showTestData = d3.select('#show-test-data').on('change', function () {
     state.showTestData = (this as HTMLInputElement).checked;
     state.serialize();
@@ -243,18 +224,6 @@ function makeGUI() {
   // Check/uncheck the checbox according to the current state.
   discretize.property('checked', state.discretize);
 
-  /* Data configurations */
-  // Configure the ratio of training data to test data.
-  const percTrain = d3.select('#percTrainData').on('input', function () {
-    const element = this as HTMLInputElement;
-    state.percTrainData = +element.value;
-    d3.select("label[for='percTrainData'] .value")
-      .text(element.value);
-    reset();
-  });
-  percTrain.property('value', state.percTrainData);
-  d3.select("label[for='percTrainData'] .value")
-    .text(state.percTrainData);
 
   // Configure the level of noise.
   const noise = d3.select('#noise').on('input', function () {
@@ -291,7 +260,6 @@ function makeGUI() {
     .call(xAxis);
 }
 
-// 
 function get2dArray(dataArray: Example2D[]) {
   if(dataArray != null && dataArray != undefined) {
     var resultMatrix: Number[][] = [];
@@ -320,22 +288,12 @@ function drawDatasetThumbnails() {
     };
     d3.selectAll('.dataset').style('display', 'none');
   
-    if (isClassification()) {
-      for (const dataset in datasets) {
-        const canvas: any = document.querySelector(
-          `canvas[data-dataset=${dataset}]`
-        );
-        const dataGenerator = datasets[dataset];
-        renderThumbnail(canvas, dataGenerator);
-      }
-    } else {
-      for (const regDataset in regDatasets) {
-        const canvas: any = document.querySelector(
-          `canvas[data-regDataset=${regDataset}]`
-        );
-        const dataGenerator = regDatasets[regDataset];
-        renderThumbnail(canvas, dataGenerator);
-      }
+    for (const dataset in datasets) {
+      const canvas: any = document.querySelector(
+        `canvas[data-dataset=${dataset}]`
+      );
+      const dataGenerator = datasets[dataset];
+      renderThumbnail(canvas, dataGenerator);
     }
 }
 
@@ -348,17 +306,13 @@ function generateData(firstTime = false) {
   
     seedrandom(state.seed);
   
-    const numSamples = isClassification()
-      ? NUM_SAMPLES_CLASSIFY
-      : NUM_SAMPLES_REGRESS;
-    const generator = isClassification()
-      ? state.dataset
-      : state.regDataset;
+    const numSamples = NUM_SAMPLES_CLASSIFY
+    const generator = state.dataset;
   
     data = generator(numSamples, state.noise / 100);
     // Shuffle the data in-place.
     shuffle(data);
-    [trainData, testData] = splitTrainTest(data);
+    testData = data;
     updatePoints();
 }
 
@@ -368,52 +322,17 @@ function generateData(firstTime = false) {
  */
 function reset(onStartup = false) {
   if (!onStartup) {
-    //trainWorker.terminate();
     isLoading(false);
   }
-
-  options = {
-    maxSamples: state.percSamples / 100,
-    maxFeatures: 1.0,
-    seed: undefined,
-    useSampleBagging: true,
-    replacement: false
-  };
-
-  if (isClassification()) {
-    
-    //TODO: 
-    
-  } else {
-    
-    //TODO:
-
+  else {
+    d3.select("#clusterCount").property('value', state.clusters);
   }
-
-  trainMetrics = null;
-  testMetrics = null;
-
-  d3.select("#start-button .value")
-    .text(isClassification() ? 'classify' : 'regress');
-
-
- // uploadedData = uploadedData || [];
   
-  [trainData, testData] = splitTrainTest(data);
+  testData = data;
 
   state.serialize();
   updatePoints();
   updateUI(true);
-}
-
-/**
- * Split the input array into 2 chunks by an index determined by the selected
- * percentage of train data.
- * @param arr
- */
-function splitTrainTest(arr: any[]): any[][] {
-  const splitIndex = Math.floor((arr.length * state.percTrainData) / 100);
-  return [arr.slice(0, splitIndex) , arr.slice(splitIndex)];
 }
 
 /**
@@ -449,27 +368,18 @@ function updateUI(reset = false) {
     row.append('td')
       .attr('class', 'mdl-data-table__cell--non-numeric')
       .text(metric);
-    // Next 2 rows contain train and test metric values
-    row.append('td')
-      .text(trainMetrics ? trainMetrics[metric].toFixed(3) : '0.000');
-    row.append('td')
-      .text(testMetrics ? testMetrics[metric].toFixed(3) : '0.000');
   });
 }
 
 function updatePoints() {
-  mainHeatMap.updatePoints(trainData);
+  mainHeatMap.updatePoints(testData);
   mainHeatMap.updateTestPoints(state.showTestData ? testData : []);
-  outputHeatMap.updatePoints(trainData);
-}
-
-function isClassification() {
-    return state.problem === Problem.CLASSIFICATION;
+  outputHeatMap.updatePoints(testData);
 }
 
 function setClusterIndexes(clusters: number[]) {
-  if (!!clusters && trainData.length == clusters.length) {
-    trainData.forEach((val, idx) => {
+  if (!!clusters && testData.length == clusters.length) {
+    testData.forEach((val, idx) => {
       val.cluster = clusters[idx];
     });
   }

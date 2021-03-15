@@ -66,7 +66,7 @@ limitations under the License.
                 </select>
               </div>
             </div>
-            <div class="control ui-problem">
+            <!-- <div class="control ui-problem">
               <label for="problem">Problem type</label>
               <div class="select">
                 <select id="problem">
@@ -74,7 +74,7 @@ limitations under the License.
                   <option value="regression">Regression</option>
                 </select>
               </div>
-            </div>
+            </div> -->
         </div>
     </div>
     <!-- Main Part -->
@@ -100,6 +100,9 @@ limitations under the License.
                   <div class="dataset" title="Moon">
                     <canvas class="data-thumbnail" data-dataset="moon"></canvas>
                   </div>
+                  <div class="dataset" title="Aniso">
+                    <canvas class="data-thumbnail" data-dataset="aniso"></canvas>
+                  </div>
                   <div class="dataset" title="Plane">
                     <canvas class="data-thumbnail" data-regDataset="reg-plane"></canvas>
                   </div>
@@ -109,12 +112,6 @@ limitations under the License.
                 </div>
             </div>
             <div>
-                <div class="ui-percTrainData">
-                  <label for="percTrainData">training data ratio:&nbsp;&nbsp;<span class="value">XX</span>%</label>
-                  <p class="slider">
-                    <input class="mdl-slider mdl-js-slider" type="range" id="percTrainData" min="10" max="90" step="10">
-                  </p>
-                </div>
                 <div class="ui-noise">
                   <label for="noise">Noise:&nbsp;&nbsp;<span class="value">XX</span></label>
                   <p class="slider">
