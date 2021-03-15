@@ -258,22 +258,7 @@ export class HeatMap {
   }
 
   public setColorScale(){
-    
     this.isClusteredData = true;
-    
-    // let tmpScaleNew = d3
-    // .scaleOrdinal<number, string>()
-    // .domain(domainRange)
-    // .range(colorRange);
-
-    // let colors = d3
-    //   .range(0, 1 + 1e-9, 1 / NUM_SHADES)
-    //   .map((a) => tmpScaleNew(a));
-
-    // this.color = d3
-    //   .scaleOrdinal<number, string>()
-    //   .domain(domainRange)
-    //   .range(colors);
   }
   
 } // Close class HeatMap.

@@ -21,15 +21,14 @@ import { HeatMap } from './heatmap';
 import {
     State,
     datasets,
-    regDatasets,
     getKeyFromValue,
   } from './state';
 import { DataGenerator, Example2D, shuffle, isValid } from './dataset';
 import * as utils from './utils';
 import kmeans from 'ml-kmeans';
 
-const NUM_SAMPLES_CLASSIFY = 400;
-const NUM_SAMPLES_REGRESS = 800;
+// Number of samples in per dataset
+const NUM_SAMPLES_CLASSIFY = 500;
 // Size of the heatmaps.
 const SIDE_LENGTH = 300;
 // # of points per direction.
@@ -39,13 +38,10 @@ const state = State.deserializeState();
 const xDomain: [number, number] = [-6, 6];
 
 const colorsPreset = ['#e8eaeb', '#0877bd', '#c27ba0', '#8e7cc3', '#6d9eeb', '#76a5af', '#93c47d', '#f6b26b'];
-// Label values must be scaled before and after training since RF impl does not
-// accepts negative values.
 
 const colorScale = d3
     .scaleLinear<string, number>()
     .domain([-1, 0, 1])
-    //.range(['#f59322', '#e8eaeb', '#0877bd'])
     .range(['#808B96', '#808B96', '#808B96'])
     .clamp(true);
 
@@ -59,7 +55,7 @@ const mainHeatMap = new HeatMap(
     { showAxes: true }
 );
 
-// Plot the main heatmap.
+// Plot the clustered heatmap.
 const outputHeatMap = new HeatMap(
   SIDE_LENGTH,
   DENSITY,
@@ -80,24 +76,26 @@ let metricList = [];
 function makeGUI() {
   d3.select('#start-button').on('click', () => {
     isLoading(true);
-    
+    /* not used */
     let centroidIndexes = utils.randArray(0, testData.length-1, state.clusters);
 
     let centroidArray = [];
     centroidIndexes.forEach(i => {
       centroidArray.push(testData[i]);
     });
+    /* Not used  */
 
+    // initializing input parameters for K Means method
     let inputData = get2dArray(testData);
     let noOfClusters = parseInt(state.clusters.toString());
     let seedForKmeans = utils.getRandomInt(0,testData.length-1);
-    console.log('Clusters = '+noOfClusters + ', Seed = ' + seedForKmeans);
+    console.log('Clusters = ' + noOfClusters + ', Seed = ' + seedForKmeans);
 
-    //let centers = d3.select('#clusterCount').value();
+    // K Means Clustering algorithm
     let ans = kmeans(inputData, noOfClusters, 
       { seed: seedForKmeans});
-    //console.log(ans);
-    
+  
+    // set index for resultant clusters 
     setClusterIndexes(ans.clusters);
     
     outputHeatMap.setColorScale();
@@ -105,7 +103,7 @@ function makeGUI() {
 
     isLoading(false);
   });
-
+  // Select number clusters from dropdown data
   let centers = d3.select("#clusterCount").on("change", function() {
    state.clusters = (this as any).value;
    state.serialize();
@@ -133,97 +131,7 @@ function makeGUI() {
   const datasetKey = getKeyFromValue(datasets, state.dataset);
   // Select the dataset according to the current state.
   d3.select(`canvas[data-dataset=${datasetKey}]`)
-    .classed('selected', true);
-
-  const regDataThumbnails = d3.selectAll('canvas[data-regDataset]');
-  regDataThumbnails.on('click', function () {
-    const newDataset = regDatasets[(this as HTMLCanvasElement).dataset.regdataset!];
-    if (newDataset === state.regDataset) {
-      return; // No-op.
-    }
-    state.regDataset = newDataset;
-    regDataThumbnails.classed('selected', false);
-    d3.select(this).classed('selected', true);
-    generateData();
-    reset();
-  });
-
-  const regDatasetKey = getKeyFromValue(regDatasets, state.regDataset);
-  // Select the dataset according to the current state.
-  d3.select(`canvas[data-regDataset=${regDatasetKey}]`)
-    .classed('selected', true);
-
-  d3.select('#file-input')
-    .on('input', async function() {
-      const element = this as HTMLInputElement;
-      const file = element.files![0];
-
-      if (file.type !== 'application/json') {
-        element.value = '';
-        alert('The uploaded file is not a JSON file.');
-        return;
-      }
-
-      try {
-        uploadedData = JSON.parse(await file.text());
-        if (!isValid(uploadedData)) {
-          element.value = '';
-          uploadedData = [];
-          throw Error('The uploaded file does not have a valid format');
-        }
-        d3.select('#file-name').text(file.name);
-      } catch (err) {
-        alert('The uploaded file does not have a valid format.');
-      }
-    });
-
-  d3.select('#file-select')
-    .on('click', () => {
-      if (uploadedData.length === 0) return;
-      data = uploadedData;
-      testData = data;
-      updatePoints();
-      reset();
-    });
-
-  /* Main Column */
-
-
-  /* Output Column */
-  // Configure the number of trees
-  // deleted code
-
-  // Configure the max depth of each tree.
- 
-
-  // Configure the number of samples to train each tree.
-  const percSamples = d3.select('#percSamples').on('input', function () {
-    const element = this as HTMLInputElement;
-    state.percSamples = +element.value;
-    d3.select("label[for='percSamples'] .value")
-      .text(element.value);
-    reset();
-  });
-  percSamples.property('value', state.percSamples);
-  d3.select("label[for='percSamples'] .value")
-    .text(state.percSamples);
-
-  const showTestData = d3.select('#show-test-data').on('change', function () {
-    state.showTestData = (this as HTMLInputElement).checked;
-    state.serialize();
-    //mainHeatMap.updateTestPoints(state.showTestData ? testData : []);
-  });
-  // Check/uncheck the checkbox according to the current state.
-  showTestData.property('checked', state.showTestData);
-
-  const discretize = d3.select('#discretize').on('change', function () {
-    state.discretize = (this as HTMLInputElement).checked;
-    state.serialize();
-    
-  });
-  // Check/uncheck the checbox according to the current state.
-  discretize.property('checked', state.discretize);
-
+    .classed('selected', true);  
 
   // Configure the level of noise.
   const noise = d3.select('#noise').on('input', function () {
@@ -259,7 +167,7 @@ function makeGUI() {
     .attr('transform', 'translate(0,10)')
     .call(xAxis);
 }
-
+//Formatting test dataset suitable for K Means method input
 function get2dArray(dataArray: Example2D[]) {
   if(dataArray != null && dataArray != undefined) {
     var resultMatrix: Number[][] = [];
@@ -345,8 +253,6 @@ function isLoading(loading: boolean) {
     d3.select('#main-heatmap canvas')
       .style('opacity', loading ? 0.2 : 1);
     d3.select('#main-heatmap svg')
-      .style('opacity', loading ? 0.2 : 1);
-    d3.selectAll('.tree-heatmaps-container canvas')
       .style('opacity', loading ? 0.2 : 1);
     d3.select('#output-heatmap canvas')
       .style('opacity', loading ? 0.2 : 1);

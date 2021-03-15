@@ -34,7 +34,7 @@ export type Point = {
 
 const schema: Schema = {
   type: 'array',
-  maxItems: 1500,
+  maxItems: 1000,
   items: {
     type: 'object',
     required: ['x', 'y', 'label'],
@@ -107,7 +107,6 @@ Example2D[] {
       points.push({ x, y, label, cluster });
     }
   }
-
   genGauss(2, 2, 1); // Gaussian with positive examples.
   genGauss(-2, -2, -1); // Gaussian with negative examples.
   return points;
@@ -148,10 +147,8 @@ Example2D[] {
       const angle = randUniform(0, 2 * Math.PI);
       const x = r * Math.cos(angle);
       const y = r * Math.sin(angle);
-      const noiseX = randUniform(-radius, radius) * noise;
-      const noiseY = randUniform(-radius, radius) * noise;
       const label = getCircleLabel(
-        { x: x + noiseX, y: y + noiseY },
+        { x: x , y: y },
         { x: 0, y: 0 },
       );
       const cluster: number = 0;
@@ -159,8 +156,8 @@ Example2D[] {
     }
   }
 
-  genCircle(0, radius * 0.5);
-  genCircle(radius * 0.7, radius);
+  genCircle(0, radius * (0.5 + noise));
+  genCircle(radius * (0.7 + noise), radius);
   return points;
 }
 
@@ -254,72 +251,6 @@ Example2D[] {
     
     points.push({ x, y, label, cluster });
   }
-
-  return points;
-}
-
-export function regressPlane(numSamples: number, noise: number): Example2D[] {
-  const radius = 6;
-  const labelScale = d3
-    .scaleLinear()
-    .domain([-12, 12])
-    .range([-1, 1]);
-  const getLabel = (x: number, y: number) => labelScale(x + y);
-
-  const points: Example2D[] = [];
-  for (let i = 0; i < numSamples; i++) {
-    const x = randUniform(-radius, radius);
-    const y = randUniform(-radius, radius);
-    const noiseX = randUniform(-radius, radius) * noise;
-    const noiseY = randUniform(-radius, radius) * noise;
-    const label = getLabel(x + noiseX, y + noiseY);
-    const cluster: number = 0;
-    points.push({ x, y, label, cluster });
-  }
-  return points;
-}
-
-export function regressGaussian(
-  numSamples: number,
-  noise: number
-): Example2D[] {
-  const points: Example2D[] = [];
-  const radius = 6;
-  const gaussians = [
-    [-4, 2.5, 1],
-    [0, 2.5, -1],
-    [4, 2.5, 1],
-    [-4, -2.5, -1],
-    [0, -2.5, 1],
-    [4, -2.5, -1]
-  ];
-  const labelScale = d3
-    .scaleLinear()
-    .domain([0, 2])
-    .range([1, 0])
-    .clamp(true);
-  const getLabel = (x: number, y: number) => {
-    // Choose the one that is maximum in abs value.
-    let label = 0;
-    gaussians.forEach(([cx, cy, sign]) => {
-      const newLabel = sign * labelScale(dist({ x, y }, { x: cx, y: cy }));
-      if (Math.abs(newLabel) > Math.abs(label)) {
-        label = newLabel;
-      }
-    });
-    return label;
-  };
-
-  for (let i = 0; i < numSamples; i++) {
-    const x = randUniform(-radius, radius);
-    const y = randUniform(-radius, radius);
-    const noiseX = randUniform(-radius, radius) * noise;
-    const noiseY = randUniform(-radius, radius) * noise;
-    const label = getLabel(x + noiseX, y + noiseY);
-    const cluster: number = 0;
-    points.push({ x, y, label, cluster });
-  }
-
   return points;
 }
 

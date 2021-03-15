@@ -27,11 +27,6 @@ export const datasets: { [key: string]: dataset.DataGenerator } = {
   aniso: dataset.classifyAnisoData
 };
 
-/** A map between dataset names and functions that generate regression data. */
-export const regDatasets: { [key: string]: dataset.DataGenerator } = {
-  'reg-plane': dataset.regressPlane,
-  'reg-gauss': dataset.regressGaussian
-};
 
 export function getKeyFromValue(obj: any, value: any): any {
     for (const key in obj) if (obj[key] === value) return key;
@@ -62,7 +57,6 @@ export interface Property {
 export class State {
   private static PROPS: Property[] = [
     { name: 'dataset', type: Type.OBJECT, keyMap: datasets },
-    { name: 'regDataset', type: Type.OBJECT, keyMap: regDatasets },
     { name: 'noise', type: Type.NUMBER },
     { name: 'seed', type: Type.STRING },
     { name: 'discretize', type: Type.BOOLEAN },
@@ -74,7 +68,6 @@ export class State {
   noise = 0;
   discretize = false;
   dataset: dataset.DataGenerator = dataset.classifyCircleData;
-  regDataset: dataset.DataGenerator = dataset.regressPlane;
   seed: string | undefined;
   percSamples = 80;
   clusters = 2;
