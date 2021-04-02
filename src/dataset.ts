@@ -107,8 +107,9 @@ Example2D[] {
       points.push({ x, y, label, cluster });
     }
   }
-  genGauss(2, 2, 1); // Gaussian with positive examples.
-  genGauss(-2, -2, -1); // Gaussian with negative examples.
+  genGauss(0, 2, 1); // Gaussian with positive examples.
+  genGauss(-3, -2, -1); // Gaussian with negative examples.
+  genGauss(2, -1, -1);
   return points;
 }
 
@@ -168,7 +169,7 @@ Example2D[] {
   function getMoonLabel(p: Point, center: Point) {
     return (dist(p, center) < (radius * 0.5)) ? 1 : -1;
   }
-  const samples_out = Math.floor(numSamples/2);
+  const samples_out = Math.floor(numSamples/2); //integer division
   const samples_in = numSamples - samples_out;
 
   function genUpperMoon(mean: number, variance: number) {
@@ -213,18 +214,19 @@ Example2D[] {
     .domain([0, 0.5])
     .range([0.5, 4]);
   const variance = varianceScale(noise);
+  const transform = [[0.6, -0.6], [-0.4, 0.8]];
 
   function genAniso(cx: number, cy: number, label: number) {
     for (let i = 0; i < numSamples / 2; i++) {
-      const x = normalRandom(cx, variance);
-      const y = normalRandom(cy, variance);
+      const x = Math.sin(Math.PI) + normalRandom(cx, variance);
+      const y = Math.cos(Math.PI) + normalRandom(cy, variance);
       const cluster: number = 0;
       points.push({ x, y, label, cluster });
     }
   }
-
-  genAniso(2, 2, 1); // Gaussian with positive examples.
-  genAniso(-2, -2, -1); // Gaussian with negative examples.
+  genAniso(1, 2, 1); // Gaussian with positive examples.
+  genAniso(-3, -1, -1); // Gaussian with negative examples.
+  genAniso(2, -2, -2);
   return points;
 }
 

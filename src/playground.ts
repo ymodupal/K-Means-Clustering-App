@@ -28,7 +28,7 @@ import * as utils from './utils';
 import kmeans from 'ml-kmeans';
 
 // Number of samples in per dataset
-const NUM_SAMPLES_CLASSIFY = 500;
+const NUM_SAMPLES_CLASSIFY = 600;
 // Size of the heatmaps.
 const SIDE_LENGTH = 300;
 // # of points per direction.
