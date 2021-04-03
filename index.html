@@ -39,7 +39,7 @@ limitations under the License.
     </a>
     <!-- Header -->
     <header>
-        <h1 class="l--page">Tinker With a <b>K-Means Clustering Algorithm</b> <span class="optional">Right here </span>in the
+        <h1 class="l--page">Tinker With different <b> Clustering Algorithms</b> <span class="optional">Right here </span>in the
             Browser.</h1>
     </header>
     <!-- Body -->
@@ -48,12 +48,11 @@ limitations under the License.
         <div class="container l--page">
             <div class="timeline-controls">
               <button class="basic-button" id="start-button" title="Train & Classify data">
-                
                 <span class="value">Clusterize</span>
               </button>
             </div>
             <div class="control ui-clusterCount">
-              <label for="clusterCount">Cluster count (K)</label>
+              <label for="clusterCount">K Value for K-Means Algorithm</label>
               <div class="select">
                 <select id="clusterCount">
                   <option value="2">2</option>
@@ -65,6 +64,15 @@ limitations under the License.
                   <option value="8">8</option>
                 </select>
               </div>
+            </div>
+            <div class="control ui-problem">
+
+            </div>
+            <div class="control ui-problem">
+              
+            </div>
+            <div class="control ui-problem">
+              
             </div>
             <!-- <div class="control ui-problem">
               <label for="problem">Problem type</label>
@@ -124,31 +132,42 @@ limitations under the License.
             </div>
         </div>
         
-        <!-- Hidden Layers Column -->
-        <div class="column hidden-layers">
-           <h4>Cluster initialization</h4>
-           <div class="centroidView" style="display: flex;">
-            <div>
-              <div>Initial Data:</div>
-              <div id="main-heatmap" class="main-viz">
-              </div>
-            </div>
-          </div> 
-        </div>
-        <!-- Output Column -->
+        <!-- K Means Clustering Column -->
         <div class="column output">
           <div class="clusterView" style="display: flex;">
             <div>
-              <h4>Output</h4>
-              <div id="output-heatmap" class="output-viz">
+              <h4 class="chart-header">K Means</h4>
+              <div id="kmeans-heatmap" class="output-viz">
               </div>
-          </div>
+            </div>
           </div>
         </div>
-       <!-- <a href="#" onclick="showalert()">Test Script</a>-->
-    </div>
-    
-    <script src="bundle.js"></script>
+
+        <!-- Density Based Clustering -->
+        <div class="column output">
+          <div class="clusterView" style="display: flex;">
+            <div>
+              <h4>Density Based (DB Scan)</h4>
+              <div id="dbscan-heatmap" class="main-viz">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Expectation Maximization Clustering -->
+        <div class="column output">
+          <div class="clusterView" style="display: flex;">
+            <div>
+              <h4>Expectation Maximization</h4>
+              <div id="maximization-heatmap" class="maximization-viz">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+  <script src="bundle.js"></script>
 </body>
 <!-- Footer -->
 <footer>

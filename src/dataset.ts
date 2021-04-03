@@ -16,6 +16,7 @@ limitations under the License.
 
 import * as d3 from "d3";
 import { Schema, Validator } from 'jsonschema';
+import * as tf from '@tensorflow/tfjs';
 
 /**
  * A two dimensional example: x and y coordinates with the label.
@@ -25,6 +26,7 @@ export type Example2D = {
   y: number;
   label: number;
   cluster: number;
+  IsCentroid: boolean;
 };
 
 export type Point = {
@@ -104,12 +106,12 @@ Example2D[] {
       const x = normalRandom(cx, variance);
       const y = normalRandom(cy, variance);
       const cluster: number = 0;
-      points.push({ x, y, label, cluster });
+      points.push(Get2dPoint(x, y, label, cluster, false));
     }
   }
   genGauss(0, 2, 1); // Gaussian with positive examples.
   genGauss(-3, -2, -1); // Gaussian with negative examples.
-  genGauss(2, -1, -1);
+  genGauss(3, -1, -1);
   return points;
 }
 
@@ -125,7 +127,7 @@ Example2D[] {
       const x = r * Math.sin(t) + randUniform(-1, 1) * noise;
       const y = r * Math.cos(t) + randUniform(-1, 1) * noise;
       const cluster: number = 0;
-      points.push({ x, y, label, cluster });
+      points.push(Get2dPoint(x, y, label, cluster, false));
     }
   }
 
@@ -153,7 +155,7 @@ Example2D[] {
         { x: 0, y: 0 },
       );
       const cluster: number = 0;
-      points.push({ x, y, label, cluster });
+      points.push(Get2dPoint( x, y, label, cluster, false));
     }
   }
 
@@ -183,7 +185,7 @@ Example2D[] {
         { x: 0, y: 0 },
       );
       const cluster: number = 0;
-      points.push({ x, y, label, cluster });
+      points.push(Get2dPoint(x, y, label, cluster, false));
     }
   }
   function genLowerMoon(mean: number, variance: number) {
@@ -197,7 +199,7 @@ Example2D[] {
         { x: 0, y: 0 },
       );
       const cluster: number = 0;
-      points.push({ x, y, label, cluster });
+      points.push(Get2dPoint(x, y, label, cluster, false));
     }
   }
   genUpperMoon(-radius, -radius * (0.8 - noise));
@@ -214,26 +216,35 @@ Example2D[] {
     .domain([0, 0.5])
     .range([0.5, 4]);
   const variance = varianceScale(noise);
-  const transform = [[0.6, -0.6], [-0.4, 0.8]];
+  //const transform = [[0.6, -0.6], [-0.6, 0.9]];
 
-  function genAniso(cx: number, cy: number, label: number) {
+  function genAniso(cx: number, cy: number, label: number, transform: number[][]) {
+    let matA = [];
     for (let i = 0; i < numSamples / 2; i++) {
       const x = Math.sin(Math.PI) + normalRandom(cx, variance);
       const y = Math.cos(Math.PI) + normalRandom(cy, variance);
-      const cluster: number = 0;
-      points.push({ x, y, label, cluster });
+      matA.push([x, y]);
     }
+
+    let mulRes = <number[][]>tf.matMul(matA, transform).arraySync();
+    //console.log(mulRes);
+    const cluster: number = 0;
+    mulRes.forEach(item => {
+      const x: number = item[0];
+      const y: number = item[1];
+      points.push(Get2dPoint(x, y, label, cluster, false));
+    });
   }
-  genAniso(1, 2, 1); // Gaussian with positive examples.
-  genAniso(-3, -1, -1); // Gaussian with negative examples.
-  genAniso(2, -2, -2);
+  genAniso(0, 4, 1, [[0.7, -0.7], [-0.6, 1.0]]);
+  genAniso(-6, -2, -3, [[0.7, -0.7], [-0.6, 1.0]]);
+  genAniso(-1, -3, -4, [[0.7, -0.7], [-0.6, 1.0]]);
   return points;
 }
 
 export function classifyXORData(numSamples: number, noise: number):
 Example2D[] {
   const points: Example2D[] = [];
-  const padding = 0.3;
+  const padding = 0.35;
   const radius = 5;
   function getXORLabel(p: Point) {
     return p.x * p.y >= 0 ? 1 : -1;
@@ -251,7 +262,7 @@ Example2D[] {
     const label = getXORLabel({ x: x + noiseX, y: y + noiseY });
     const cluster: number = 0;
     
-    points.push({ x, y, label, cluster });
+    points.push(Get2dPoint(x, y, label, cluster, false));
   }
   return points;
 }
@@ -291,4 +302,15 @@ function dist(a: Point, b: Point): number {
   const dx = a.x - b.x;
   const dy = a.y - b.y;
   return Math.sqrt(dx ** 2 + dy ** 2);
+}
+
+export function Get2dPoint(x: number, y: number, label: number, cluster: number, IsCentroid: boolean): Example2D  {
+  var obj: Example2D = {
+    x: x,
+    y: y,
+    label: label,
+    cluster: cluster,
+    IsCentroid: IsCentroid
+  } 
+  return obj;
 }

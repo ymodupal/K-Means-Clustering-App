@@ -239,7 +239,7 @@ body {
   
   @media (min-height: 700px) {
     #top-controls {
-      padding: 24px 0;
+      padding: 2px 0;
     }
   }
   
@@ -249,7 +249,7 @@ body {
     display: -ms-flexbox;
     display: -webkit-flex;
     display: flex;
-    -webkit-justify-content: space-betweenspace-between;
+    -webkit-justify-content: space-between;
     justify-content: space-between;
   }
   
@@ -264,24 +264,6 @@ body {
     width: 140px;
   }
   
-  #play-pause-button .material-icons {
-    color: white;
-    font-size: 36px;
-    transform: translate(-18px,-12px);
-  }
-  
-  
-  #play-pause-button .material-icons:nth-of-type(2) {
-    display: none;
-  }
-  
-  #play-pause-button.playing .material-icons:nth-of-type(1) {
-    display: none;
-  }
-  
-  #play-pause-button.playing .material-icons:nth-of-type(2) {
-    display: inherit;
-  }
   
   #top-controls .control {
     flex-grow: 1;
@@ -291,9 +273,9 @@ body {
     margin-top: 6px;
   }
   
-  #top-controls .control .label,
+
   #top-controls .control label {
-    color: #777;
+    color: rgba(14, 12, 12, 0.884);
     font-size: 13px;
     display: block;
     margin-bottom: 6px;
@@ -351,6 +333,9 @@ body {
     pointer-events: none;
   }
   
+  .ui-clusterCount {
+    align-items: left !important;
+  } 
   /* Hover card */
   #hovercard {
     display: none;
@@ -401,7 +386,6 @@ body {
     align-items: center;
     font-weight: 400;
     font-size: 16px;
-    text-transform: uppercase;
     position: relative;
     padding-bottom: 8px;
     margin: 0;
@@ -769,6 +753,7 @@ body {
   
   .output.column {
     width: 30%;
+    padding-left: 40px;
   }
   
   .metrics {
@@ -977,3 +962,7 @@ body {
     box-shadow: 0 0 0 10px rgba(0,0,0, 0.12);
   }
   
+  .chart-header {
+    text-align: center;
+    padding-bottom: 10px;
+  }

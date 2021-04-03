@@ -26,7 +26,8 @@ export interface HeatMapSettings {
 /** Number of different shades (colors) when drawing a gradient heatmap */
 const NUM_SHADES = 30;
 
-const colorsPreset = ['#f59322', '#0877bd', '#c27ba0', '#8e7cc3', '#6d9eeb', '#76a5af', '#93c47d', '#f6b26b'];
+const colorsPreset = ['#f59322', '#0877bd', '#c27ba0', '#8e7cc3', '#6d9eeb', '#76a5af', '#93c47d', '#f6b26b', '#000000'];
+const centroidColorPreset = ['#e3861b', '#0853bd', '#b83b6f', '#3b12b3', '#266fe0', '#1e6675', '#568a3f', '#8f5f2e'];
 
 /**
  * Draws a heatmap using canvas. Used for showing the learned decision
@@ -229,14 +230,14 @@ export class HeatMap {
     selection
       .enter()
       .append('circle')
-      .attr('r', 3)
+      .attr('r', (d) => {
+        return d.IsCentroid ? 4 : 3;
+      })
       // Update points to be in the correct position.
       .attr('cx', (d: Example2D) => this.xScale(d.x))
       .attr('cy', (d: Example2D) => this.yScale(d.y))
-      .style('fill', (d) => { 
-        //console.log(d.cluster);
-        //console.log(colorsPreset[d.cluster]);
-        return this.isClusteredData ? colorsPreset[d.cluster] : '#808B96' 
+      .style('fill', (d) => {
+        return d.IsCentroid ? centroidColorPreset[d.cluster] : this.isClusteredData ? colorsPreset[d.cluster] : '#808B96';
       })
       // Update hover cards.
       .on('mouseenter', (event: Event, d: Example2D) => {
@@ -257,8 +258,8 @@ export class HeatMap {
     selection.exit().remove();
   }
 
-  public setColorScale(){
-    this.isClusteredData = true;
+  public setColorScale(value: boolean) {
+    this.isClusteredData = value;
   }
   
 } // Close class HeatMap.

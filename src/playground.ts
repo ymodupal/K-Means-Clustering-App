@@ -23,9 +23,11 @@ import {
     datasets,
     getKeyFromValue,
   } from './state';
-import { DataGenerator, Example2D, shuffle, isValid } from './dataset';
+import { DataGenerator, Example2D, shuffle, Get2dPoint } from './dataset';
 import * as utils from './utils';
 import kmeans from 'ml-kmeans';
+import * as dc from 'density-clustering';
+import * as expectation_maximization from 'expectation-maximization';
 
 // Number of samples in per dataset
 const NUM_SAMPLES_CLASSIFY = 600;
@@ -36,8 +38,6 @@ const DENSITY = 50;
   
 const state = State.deserializeState();
 const xDomain: [number, number] = [-6, 6];
-
-const colorsPreset = ['#e8eaeb', '#0877bd', '#c27ba0', '#8e7cc3', '#6d9eeb', '#76a5af', '#93c47d', '#f6b26b'];
 
 const colorScale = d3
     .scaleLinear<string, number>()
@@ -51,7 +51,7 @@ const mainHeatMap = new HeatMap(
     DENSITY,
     xDomain,
     xDomain,
-    d3.select('#main-heatmap'),
+    d3.select('#dbscan-heatmap'),
     { showAxes: true }
 );
 
@@ -61,7 +61,16 @@ const outputHeatMap = new HeatMap(
   DENSITY,
   xDomain,
   xDomain,
-  d3.select('#output-heatmap'),
+  d3.select('#kmeans-heatmap'),
+  { showAxes: true }
+);
+
+const maximizationHeatMap = new HeatMap(
+  SIDE_LENGTH,
+  DENSITY,
+  xDomain,
+  xDomain,
+  d3.select('#maximization-heatmap'),
   { showAxes: true }
 );
 
@@ -83,13 +92,15 @@ function makeGUI() {
     centroidIndexes.forEach(i => {
       centroidArray.push(testData[i]);
     });
-    /* Not used  */
+
+    //remove previous centroids
+    clearCentroidData();
 
     // initializing input parameters for K Means method
     let inputData = get2dArray(testData);
     let noOfClusters = parseInt(state.clusters.toString());
-    let seedForKmeans = utils.getRandomInt(0,testData.length-1);
-    console.log('Clusters = ' + noOfClusters + ', Seed = ' + seedForKmeans);
+    let seedForKmeans = utils.getRandomInt(0, testData.length - 1);
+    //console.log('Clusters = ' + noOfClusters + ', Seed = ' + seedForKmeans);
 
     // K Means Clustering algorithm
     let ans = kmeans(inputData, noOfClusters, 
@@ -97,9 +108,19 @@ function makeGUI() {
   
     // set index for resultant clusters 
     setClusterIndexes(ans.clusters);
-    
-    outputHeatMap.setColorScale();
+
+    ans.centroids.forEach((item, idx) => {
+      testData.push(Get2dPoint(item.centroid[0], item.centroid[1], 1, idx, true));
+    });
+
+    outputHeatMap.setColorScale(true);
     outputHeatMap.updatePoints(testData);
+
+    let densityData = cloneInputData(inputData);
+    DensityScan(densityData);
+
+    let emData = cloneInputData(inputData);
+    cluster_expectation_maximization(emData);
 
     isLoading(false);
   });
@@ -117,6 +138,11 @@ function makeGUI() {
 
   const dataThumbnails = d3.selectAll('canvas[data-dataset]');
   dataThumbnails.on('click', function () {
+
+    mainHeatMap.setColorScale(false);
+    outputHeatMap.setColorScale(false);
+    maximizationHeatMap.setColorScale(false);
+
     const newDataset = datasets[(this as HTMLElement).dataset.dataset!];
     if (newDataset === state.dataset) {
       return; // No-op.
@@ -170,7 +196,7 @@ function makeGUI() {
 //Formatting test dataset suitable for K Means method input
 function get2dArray(dataArray: Example2D[]) {
   if(dataArray != null && dataArray != undefined) {
-    var resultMatrix: Number[][] = [];
+    var resultMatrix: number[][] = [];
     dataArray.forEach((i) => {
       resultMatrix.push([i.x, i.y]);
     });
@@ -250,13 +276,13 @@ function reset(onStartup = false) {
  * @param {boolean} loading True if something is running in the background
  */
 function isLoading(loading: boolean) {
-    d3.select('#main-heatmap canvas')
+    d3.select('#dbscan-heatmap canvas')
       .style('opacity', loading ? 0.2 : 1);
-    d3.select('#main-heatmap svg')
+    d3.select('#dbscan-heatmap svg')
       .style('opacity', loading ? 0.2 : 1);
-    d3.select('#output-heatmap canvas')
+    d3.select('#kmeans-heatmap canvas')
       .style('opacity', loading ? 0.2 : 1);
-    d3.select('#output-heatmap svg')
+    d3.select('#kmeans-heatmap svg')
       .style('opacity', loading ? 0.2 : 1); 
 }
 
@@ -279,8 +305,9 @@ function updateUI(reset = false) {
 
 function updatePoints() {
   mainHeatMap.updatePoints(testData);
-  mainHeatMap.updateTestPoints(state.showTestData ? testData : []);
+  //mainHeatMap.updateTestPoints(state.showTestData ? testData : []);
   outputHeatMap.updatePoints(testData);
+  maximizationHeatMap.updatePoints(testData);
 }
 
 function setClusterIndexes(clusters: number[]) {
@@ -289,6 +316,120 @@ function setClusterIndexes(clusters: number[]) {
       val.cluster = clusters[idx];
     });
   }
+}
+
+function clearCentroidData() {
+  if (testData != undefined && testData.length > 0) {
+    testData = testData.filter(i => i.IsCentroid == false);
+  }
+}
+
+function DensityScan(inputData: number[][]) {
+  let dbscan = new dc.DBSCAN();
+  let radius = 1;
+  let noOfClusters = 2;
+
+  if (state.dataset == datasets.circle) {
+    radius = 1;
+    noOfClusters = 2;
+  }
+  else if (state.dataset == datasets.xor) {
+    radius = 0.7;
+    noOfClusters = 4;
+  }
+  else if (state.dataset == datasets.gauss) {
+    radius = 0.5;
+    noOfClusters = 3;
+  }
+  else if (state.dataset == datasets.spiral) {
+    radius = 1;
+    noOfClusters = 3;
+  }
+  else if (state.dataset == datasets.moon) {
+    radius = 1;
+    noOfClusters = 2;
+  }
+  else if (state.dataset == datasets.aniso) {
+    radius = 0.4;
+    noOfClusters = 3;
+  }
+
+  let clusters = dbscan.run(inputData, radius, noOfClusters);
+
+  let dbScanPoints: Example2D[] = [];
+
+  let finalArrList = [];
+
+  clusters.forEach((arr, idx) => {
+    finalArrList = finalArrList.concat(arr);
+    arr.forEach(pt => {
+      var cPt = testData[pt];
+      dbScanPoints.push(Get2dPoint(cPt.x, cPt.y, cPt.label, idx, false));
+    });
+  });
+
+  let missingData = inputData.filter((item, idx) => {
+    return !finalArrList.some(d => d == idx);
+  });
+
+  if (missingData != undefined && missingData.length > 0) {
+    missingData.forEach(cPt => {
+      dbScanPoints.push(Get2dPoint(cPt[0], cPt[1], 1, 9, false));
+    });
+  }
+
+  shuffle(dbScanPoints);
+
+  mainHeatMap.setColorScale(true);
+  mainHeatMap.updatePoints(dbScanPoints);
+}
+
+function cluster_expectation_maximization(inputData: number[][]) {
+  shuffle(inputData);
+
+  let n_groups = 2;
+  if (state.dataset == datasets.circle) {
+    n_groups = 2;
+  }
+  else if (state.dataset == datasets.xor) {
+    n_groups = 4;
+  }
+  else if (state.dataset == datasets.gauss) {
+    n_groups = 3;
+  }
+  else if (state.dataset == datasets.spiral) {
+    n_groups = 3;
+  }
+  else if (state.dataset == datasets.moon) {
+    n_groups = 2;
+  }
+  else if (state.dataset == datasets.aniso) {
+    n_groups = 3;
+  }
+  var groups = expectation_maximization(inputData, n_groups);
+  console.log(groups);
+
+  let maximizationPoints: Example2D[] = [];
+
+  // groups.forEach((arr, idx) => {
+  //   console.log(arr);
+  //   // arr.forEach(pt => {
+  //   //   var cPt = inputData[pt];
+  //   //   maximizationPoints.push(Get2dPoint(cPt.x, cPt.y, cPt.label, idx, false));
+  //   // });
+  // });
+
+  //maximizationHeatMap.setColorScale(true);
+  //maximizationHeatMap.updatePoints(maximizationPoints);
+}
+
+function cloneInputData(inputData: number[][]) {
+  let result: number[][] = [];
+  inputData.forEach(item => {
+    result.push([item[0], item[1]]);
+  });
+
+  return result;
 }
 
 drawDatasetThumbnails();
