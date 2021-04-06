@@ -366,7 +366,7 @@ body {
     -webkit-justify-content: space-between;
     justify-content: space-between;
     margin-top: 30px;
-    margin-bottom: 50px;
+    margin-bottom: 100px;
     padding-top: 2px;
     position: relative;
   }
@@ -759,7 +759,7 @@ body {
   .metrics {
     position: relative;
     font-weight: 300;
-    font-size: 13px;
+    font-size: 13px;;
     height: 60px;
   }
   
@@ -949,6 +949,9 @@ body {
   #main-part .mdl-slider.is-upgraded::-ms-thumb {
     background-color: #183D4E;
   }
+
+
+
   
   #main-part .mdl-slider.is-upgraded.is-lowest-value::-webkit-slider-thumb {
     border-color: #183D4E;
@@ -965,4 +968,49 @@ body {
   .chart-header {
     text-align: center;
     padding-bottom: 10px;
+  }
+
+  .mdl-data-table {
+    position: relative;
+    border-collapse: collapse;
+    white-space: nowrap;
+    background-color: #fff
+  }
+  .mdl-data-table thead {
+    padding-bottom: 3px
+  }
+  .mdl-data-table tbody tr {
+    position: relative;
+    height: 48px;
+    transition-duration: .28s;
+    transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+    transition-property: background-color;
+  }
+  .mdl-data-table tbody tr:hover {
+    background-color: #eee
+  }
+  .mdl-data-table td {
+    position: relative;
+    height: 48px;
+    border: 1px solid rgba(0, 0, 0, .12);
+    padding: 12px 14px;
+    box-sizing: border-box;
+    /* border: 1px solid rgba(0, 0, 0, .12); */
+    text-align: center;
+    border-collapse: collapse;
+  }
+  .mdl-data-table th {
+    border: 1px solid rgba(0, 0, 0, .12);
+    position: relative;
+    vertical-align: bottom;
+    text-overflow: ellipsis;
+    font-weight: 700;
+    line-height: 24px;
+    letter-spacing: 0;
+    height: 48px;
+    font-size: 12px;
+    color: rgba(0, 0, 0, .54);
+    box-sizing: border-box;
+    padding: 12px 14px;
+    text-align: center
   }

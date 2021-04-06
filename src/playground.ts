@@ -28,6 +28,7 @@ import * as utils from './utils';
 import kmeans from 'ml-kmeans';
 import * as dc from 'density-clustering';
 import * as expectation_maximization from 'expectation-maximization';
+import { interpolateMagma } from 'd3';
 
 // Number of samples in per dataset
 const NUM_SAMPLES_CLASSIFY = 600;
@@ -45,24 +46,24 @@ const colorScale = d3
     .range(['#808B96', '#808B96', '#808B96'])
     .clamp(true);
 
-// Plot the main heatmap.
-const mainHeatMap = new HeatMap(
-    SIDE_LENGTH,
-    DENSITY,
-    xDomain,
-    xDomain,
-    d3.select('#dbscan-heatmap'),
-    { showAxes: true }
-);
-
 // Plot the clustered heatmap.
-const outputHeatMap = new HeatMap(
+const kmeansHeatMap = new HeatMap(
   SIDE_LENGTH,
   DENSITY,
   xDomain,
   xDomain,
   d3.select('#kmeans-heatmap'),
   { showAxes: true }
+);
+
+// Plot the main heatmap.
+const dbScanHeatMap = new HeatMap(
+    SIDE_LENGTH,
+    DENSITY,
+    xDomain,
+    xDomain,
+    d3.select('#dbscan-heatmap'),
+    { showAxes: true }
 );
 
 const maximizationHeatMap = new HeatMap(
@@ -85,6 +86,7 @@ let metricList = [];
 function makeGUI() {
   d3.select('#start-button').on('click', () => {
     isLoading(true);
+
     /* not used */
     let centroidIndexes = utils.randArray(0, testData.length-1, state.clusters);
 
@@ -105,16 +107,21 @@ function makeGUI() {
     // K Means Clustering algorithm
     let ans = kmeans(inputData, noOfClusters, 
       { seed: seedForKmeans});
-  
+    
     // set index for resultant clusters 
     setClusterIndexes(ans.clusters);
-
+    
+    let mean_square_error = 0;
+    let iterations = ans.iterations;
     ans.centroids.forEach((item, idx) => {
       testData.push(Get2dPoint(item.centroid[0], item.centroid[1], 1, idx, true));
+      mean_square_error += item.error;
     });
 
-    outputHeatMap.setColorScale(true);
-    outputHeatMap.updatePoints(testData);
+    updateMetrics(false, mean_square_error,iterations);
+
+    kmeansHeatMap.setColorScale(true);
+    kmeansHeatMap.updatePoints(testData);
 
     let densityData = cloneInputData(inputData);
     DensityScan(densityData);
@@ -139,8 +146,8 @@ function makeGUI() {
   const dataThumbnails = d3.selectAll('canvas[data-dataset]');
   dataThumbnails.on('click', function () {
 
-    mainHeatMap.setColorScale(false);
-    outputHeatMap.setColorScale(false);
+    dbScanHeatMap.setColorScale(false);
+    kmeansHeatMap.setColorScale(false);
     maximizationHeatMap.setColorScale(false);
 
     const newDataset = datasets[(this as HTMLElement).dataset.dataset!];
@@ -257,6 +264,9 @@ function generateData(firstTime = false) {
 function reset(onStartup = false) {
   if (!onStartup) {
     isLoading(false);
+    dbScanHeatMap.setColorScale(false);
+    kmeansHeatMap.setColorScale(false);
+    maximizationHeatMap.setColorScale(false);
   }
   else {
     d3.select("#clusterCount").property('value', state.clusters);
@@ -266,7 +276,7 @@ function reset(onStartup = false) {
 
   state.serialize();
   updatePoints();
-  updateUI(true);
+  updateMetrics(true, null, null);
 }
 
 /**
@@ -290,23 +300,28 @@ function isLoading(loading: boolean) {
  * Update all heat maps and metrics.
  * @param reset True when called in reset()
  */
-function updateUI(reset = false) {
+function updateMetrics(isReset: boolean, mse,iterations) {
+
+  if(isReset) {
+    d3.selectAll('.metrics table tr').remove();
+    return;
+  }
 
   // Metrics table
-  d3.selectAll('.metrics tbody tr').remove();
-  metricList.forEach((metric) => {
-    const row = d3.select('.metrics tbody').append('tr');
-    // First row contains metric name
-    row.append('td')
-      .attr('class', 'mdl-data-table__cell--non-numeric')
-      .text(metric);
-  });
-}
+  let table = d3.select('.metrics table');
+  table.selectAll('tr').remove();
+  table.select('thead').append('tr').append('th').attr('colspan', '2').text('Metrics');
+  let row1 = table.select('tbody').append('tr');
+  row1.append('td').text('Mean Square Error');
+  row1.append('td').text(mse);
+  let row2 = table.select('tbody').append('tr');
+  row2.append('td').text('Iterations');
+  row2.append('td').text(iterations);
+} 
 
 function updatePoints() {
-  mainHeatMap.updatePoints(testData);
-  //mainHeatMap.updateTestPoints(state.showTestData ? testData : []);
-  outputHeatMap.updatePoints(testData);
+  dbScanHeatMap.updatePoints(testData);
+  kmeansHeatMap.updatePoints(testData);
   maximizationHeatMap.updatePoints(testData);
 }
 
@@ -380,8 +395,8 @@ function DensityScan(inputData: number[][]) {
 
   shuffle(dbScanPoints);
 
-  mainHeatMap.setColorScale(true);
-  mainHeatMap.updatePoints(dbScanPoints);
+  dbScanHeatMap.setColorScale(true);
+  dbScanHeatMap.updatePoints(dbScanPoints);
 }
 
 function cluster_expectation_maximization(inputData: number[][]) {

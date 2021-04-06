@@ -111,7 +111,7 @@ Example2D[] {
   }
   genGauss(0, 2, 1); // Gaussian with positive examples.
   genGauss(-3, -2, -1); // Gaussian with negative examples.
-  genGauss(3, -1, -1);
+  genGauss(4, -2, -1);
   return points;
 }
 
