@@ -280,8 +280,13 @@ body {
     display: block;
     margin-bottom: 6px;
     font-weight: 300;
+    white-space: nowrap;
   }
-  
+  #top-controls .control input {
+    font-size: 14px;
+    margin: 0;
+  }
+
   #top-controls .control .value {
     font-size: 24px;
     margin: 0;
@@ -949,9 +954,6 @@ body {
   #main-part .mdl-slider.is-upgraded::-ms-thumb {
     background-color: #183D4E;
   }
-
-
-
   
   #main-part .mdl-slider.is-upgraded.is-lowest-value::-webkit-slider-thumb {
     border-color: #183D4E;

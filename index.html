@@ -52,7 +52,7 @@ limitations under the License.
               </button>
             </div>
             <div class="control ui-clusterCount">
-              <label for="clusterCount">K Value for K-Means Algorithm</label>
+              <label for="clusterCount">K Means - Number of clusters</label>
               <div class="select">
                 <select id="clusterCount">
                   <option value="2">2</option>
@@ -65,9 +65,13 @@ limitations under the License.
                 </select>
               </div>
             </div>
-            <div class="control ui-problem">
+            <div class="control ui-epsilon">
+              <label for="epsilon">DB Scan - Epsilon</label>
+              <input type="text" id="epsilon" name="epsilon" placeholder="range [0.1,3]" pattern="">
             </div>
-            <div class="control ui-problem">
+            <div class="control ui-neighbors">
+              <label for="neighbors">DB Scan - Points in neighborhood</label>
+              <input type="text" id="neighborPoints" name="neighborCount" placeholder="Integer number">
             </div>
             <div class="control ui-problem">
               

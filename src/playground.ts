@@ -23,7 +23,7 @@ import {
     datasets,
     getKeyFromValue,
   } from './state';
-import { DataGenerator, Example2D, shuffle, Get2dPoint } from './dataset';
+import { DataGenerator, Example2D, shuffle, Get2dPoint, Point } from './dataset';
 import * as utils from './utils';
 import kmeans from 'ml-kmeans';
 import * as dc from 'density-clustering';
@@ -87,14 +87,6 @@ function makeGUI() {
   d3.select('#start-button').on('click', () => {
     isLoading(true);
 
-    /* not used */
-    let centroidIndexes = utils.randArray(0, testData.length-1, state.clusters);
-
-    let centroidArray = [];
-    centroidIndexes.forEach(i => {
-      centroidArray.push(testData[i]);
-    });
-
     //remove previous centroids
     clearCentroidData();
 
@@ -102,7 +94,8 @@ function makeGUI() {
     let inputData = get2dArray(testData);
     let noOfClusters = parseInt(state.clusters.toString());
     let seedForKmeans = utils.getRandomInt(0, testData.length - 1);
-    //console.log('Clusters = ' + noOfClusters + ', Seed = ' + seedForKmeans);
+    //console.log('testData.length = ' + testData.length + ', Seed = ' + seedForKmeans);
+    //console.log('input data :'+inputData);
 
     // K Means Clustering algorithm
     let ans = kmeans(inputData, noOfClusters, 
@@ -118,6 +111,21 @@ function makeGUI() {
       mean_square_error += item.error;
     });
 
+    //**** Initial centres ****//
+    let centroidIndexes = utils.randArray(0, testData.length-1, state.clusters);
+    console.log('centroidIndexes :'+centroidIndexes);
+
+    let centroidArray= [];
+    centroidIndexes.forEach(item => {
+        var cPt = testData[item];
+        centroidArray.push([cPt.x,cPt.y]);
+        testData.push(Get2dPoint(cPt.x, cPt.y, 1, 9, false)); 
+    });
+    
+    console.log('centroidArray: '+centroidArray);
+    //**** Initial centres - ends ****//
+
+    // *** Display metrics ****//
     updateMetrics(false, mean_square_error,iterations);
 
     kmeansHeatMap.setColorScale(true);
@@ -346,7 +354,7 @@ function DensityScan(inputData: number[][]) {
 
   if (state.dataset == datasets.circle) {
     radius = 1;
-    noOfClusters = 2;
+    noOfClusters = 50;
   }
   else if (state.dataset == datasets.xor) {
     radius = 0.7;
