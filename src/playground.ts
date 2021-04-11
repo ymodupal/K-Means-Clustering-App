@@ -27,8 +27,6 @@ import { DataGenerator, Example2D, shuffle, Get2dPoint, Point } from './dataset'
 import * as utils from './utils';
 import kmeans from 'ml-kmeans';
 import * as dc from 'density-clustering';
-import * as expectation_maximization from 'expectation-maximization';
-import { interpolateMagma } from 'd3';
 
 // Number of samples in per dataset
 const NUM_SAMPLES_CLASSIFY = 600;
@@ -46,7 +44,17 @@ const colorScale = d3
     .range(['#808B96', '#808B96', '#808B96'])
     .clamp(true);
 
-// Plot the clustered heatmap.
+// Plot the input heatmap.
+const inputHeatMap = new HeatMap(
+  SIDE_LENGTH,
+  DENSITY,
+  xDomain,
+  xDomain,
+  d3.select('#input-heatmap'),
+  { showAxes: true }
+);
+
+// Plot the KMeans heatmap.
 const kmeansHeatMap = new HeatMap(
   SIDE_LENGTH,
   DENSITY,
@@ -56,7 +64,7 @@ const kmeansHeatMap = new HeatMap(
   { showAxes: true }
 );
 
-// Plot the main heatmap.
+// Plot the DB Scan heatmap.
 const dbScanHeatMap = new HeatMap(
     SIDE_LENGTH,
     DENSITY,
@@ -66,14 +74,7 @@ const dbScanHeatMap = new HeatMap(
     { showAxes: true }
 );
 
-const maximizationHeatMap = new HeatMap(
-  SIDE_LENGTH,
-  DENSITY,
-  xDomain,
-  xDomain,
-  d3.select('#maximization-heatmap'),
-  { showAxes: true }
-);
+
 
 let data: Example2D[];
 let uploadedData: Example2D[];
@@ -86,7 +87,6 @@ let metricList = [];
 function makeGUI() {
   d3.select('#start-button').on('click', () => {
     isLoading(true);
-
     //remove previous centroids
     clearCentroidData();
 
@@ -94,8 +94,7 @@ function makeGUI() {
     let inputData = get2dArray(testData);
     let noOfClusters = parseInt(state.clusters.toString());
     let seedForKmeans = utils.getRandomInt(0, testData.length - 1);
-    //console.log('testData.length = ' + testData.length + ', Seed = ' + seedForKmeans);
-    //console.log('input data :'+inputData);
+  
 
     // K Means Clustering algorithm
     let ans = kmeans(inputData, noOfClusters, 
@@ -113,7 +112,6 @@ function makeGUI() {
 
     //**** Initial centres ****//
     let centroidIndexes = utils.randArray(0, testData.length-1, state.clusters);
-    console.log('centroidIndexes :'+centroidIndexes);
 
     let centroidArray= [];
     centroidIndexes.forEach(item => {
@@ -121,8 +119,6 @@ function makeGUI() {
         centroidArray.push([cPt.x,cPt.y]);
         testData.push(Get2dPoint(cPt.x, cPt.y, 1, 9, false)); 
     });
-    
-    console.log('centroidArray: '+centroidArray);
     //**** Initial centres - ends ****//
 
     // *** Display metrics ****//
@@ -133,9 +129,6 @@ function makeGUI() {
 
     let densityData = cloneInputData(inputData);
     DensityScan(densityData);
-
-    let emData = cloneInputData(inputData);
-    cluster_expectation_maximization(emData);
 
     isLoading(false);
   });
@@ -154,9 +147,9 @@ function makeGUI() {
   const dataThumbnails = d3.selectAll('canvas[data-dataset]');
   dataThumbnails.on('click', function () {
 
-    dbScanHeatMap.setColorScale(false);
+    inputHeatMap.setColorScale(false);
     kmeansHeatMap.setColorScale(false);
-    maximizationHeatMap.setColorScale(false);
+    dbScanHeatMap.setColorScale(false);
 
     const newDataset = datasets[(this as HTMLElement).dataset.dataset!];
     if (newDataset === state.dataset) {
@@ -220,7 +213,6 @@ function get2dArray(dataArray: Example2D[]) {
   return null;
 }
 
-
 function drawDatasetThumbnails() {
     const renderThumbnail = (canvas: any, dataGenerator: DataGenerator) => {
       const w = 100;
@@ -272,9 +264,9 @@ function generateData(firstTime = false) {
 function reset(onStartup = false) {
   if (!onStartup) {
     isLoading(false);
-    dbScanHeatMap.setColorScale(false);
+    inputHeatMap.setColorScale(false);
     kmeansHeatMap.setColorScale(false);
-    maximizationHeatMap.setColorScale(false);
+    dbScanHeatMap.setColorScale(false);
   }
   else {
     d3.select("#clusterCount").property('value', state.clusters);
@@ -294,14 +286,19 @@ function reset(onStartup = false) {
  * @param {boolean} loading True if something is running in the background
  */
 function isLoading(loading: boolean) {
-    d3.select('#dbscan-heatmap canvas')
+    d3.select('#input-heatmap canvas')
       .style('opacity', loading ? 0.2 : 1);
-    d3.select('#dbscan-heatmap svg')
-      .style('opacity', loading ? 0.2 : 1);
+    d3.select('#input-heatmap svg')
+      .style('opacity', loading ? 0.2 : 1); 
     d3.select('#kmeans-heatmap canvas')
       .style('opacity', loading ? 0.2 : 1);
     d3.select('#kmeans-heatmap svg')
       .style('opacity', loading ? 0.2 : 1); 
+    d3.select('#dbscan-heatmap canvas')
+      .style('opacity', loading ? 0.2 : 1);
+    d3.select('#dbscan-heatmap svg')
+      .style('opacity', loading ? 0.2 : 1);
+    
 }
 
 /**
@@ -328,9 +325,9 @@ function updateMetrics(isReset: boolean, mse,iterations) {
 } 
 
 function updatePoints() {
-  dbScanHeatMap.updatePoints(testData);
+  inputHeatMap.updatePoints(testData);
   kmeansHeatMap.updatePoints(testData);
-  maximizationHeatMap.updatePoints(testData);
+  dbScanHeatMap.updatePoints(testData);
 }
 
 function setClusterIndexes(clusters: number[]) {
@@ -349,40 +346,16 @@ function clearCentroidData() {
 
 function DensityScan(inputData: number[][]) {
   let dbscan = new dc.DBSCAN();
-  let radius = 1;
-  let noOfClusters = 2;
+ 
+  let epsilon = d3.select('.txt_epsilon').property("value");
+  let pointsInNeighborhood = d3.select('.txt_neighborPoints').property("value");
+  console.log(epsilon);
+  console.log(pointsInNeighborhood);
 
-  if (state.dataset == datasets.circle) {
-    radius = 1;
-    noOfClusters = 50;
-  }
-  else if (state.dataset == datasets.xor) {
-    radius = 0.7;
-    noOfClusters = 4;
-  }
-  else if (state.dataset == datasets.gauss) {
-    radius = 0.5;
-    noOfClusters = 3;
-  }
-  else if (state.dataset == datasets.spiral) {
-    radius = 1;
-    noOfClusters = 3;
-  }
-  else if (state.dataset == datasets.moon) {
-    radius = 1;
-    noOfClusters = 2;
-  }
-  else if (state.dataset == datasets.aniso) {
-    radius = 0.4;
-    noOfClusters = 3;
-  }
-
-  let clusters = dbscan.run(inputData, radius, noOfClusters);
-
+  let clusters = dbscan.run(inputData, epsilon, pointsInNeighborhood);
   let dbScanPoints: Example2D[] = [];
 
   let finalArrList = [];
-
   clusters.forEach((arr, idx) => {
     finalArrList = finalArrList.concat(arr);
     arr.forEach(pt => {
@@ -405,45 +378,6 @@ function DensityScan(inputData: number[][]) {
 
   dbScanHeatMap.setColorScale(true);
   dbScanHeatMap.updatePoints(dbScanPoints);
-}
-
-function cluster_expectation_maximization(inputData: number[][]) {
-  shuffle(inputData);
-
-  let n_groups = 2;
-  if (state.dataset == datasets.circle) {
-    n_groups = 2;
-  }
-  else if (state.dataset == datasets.xor) {
-    n_groups = 4;
-  }
-  else if (state.dataset == datasets.gauss) {
-    n_groups = 3;
-  }
-  else if (state.dataset == datasets.spiral) {
-    n_groups = 3;
-  }
-  else if (state.dataset == datasets.moon) {
-    n_groups = 2;
-  }
-  else if (state.dataset == datasets.aniso) {
-    n_groups = 3;
-  }
-  var groups = expectation_maximization(inputData, n_groups);
-  console.log(groups);
-
-  let maximizationPoints: Example2D[] = [];
-
-  // groups.forEach((arr, idx) => {
-  //   console.log(arr);
-  //   // arr.forEach(pt => {
-  //   //   var cPt = inputData[pt];
-  //   //   maximizationPoints.push(Get2dPoint(cPt.x, cPt.y, cPt.label, idx, false));
-  //   // });
-  // });
-
-  //maximizationHeatMap.setColorScale(true);
-  //maximizationHeatMap.updatePoints(maximizationPoints);
 }
 
 function cloneInputData(inputData: number[][]) {

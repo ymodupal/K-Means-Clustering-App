@@ -40,67 +40,6 @@ function getLoss(yPred: number[], yTrue: number[]): number {
   return loss / yPred.length;
 }
 
-/**
- * Compute classification metrics.
- * @param yPred Estimated target value.
- * @param yTrue Correct target value.
- */
-function getClfMetrics(yPred: number[], yTrue: number[]) {
-  if (yPred.length !== yTrue.length) {
-    throw Error('Length of predictions must equal length of labels');
-  }
-
-  // 4 elements of a confusion matrix.
-  let tp = 0;
-  let tn = 0;
-  let fp = 0;
-  let fn = 0;
-
-  for (let i = 0; i < yPred.length; i++) {
-    const pred = yPred[i];
-    const label = yTrue[i];
-
-    if (pred === -1 && label === -1) tn++;
-    else if (pred === -1 && label === 1) fn++;
-    else if (pred === 1 && label === -1) fp++;
-    else if (pred === 1 && label === 1) tp++;
-    else throw Error('Predicted or true class value is invalid');
-  }
-
-  return {
-    Accuracy: (tp + tn) / (tp + tn + fp + fn),
-    Precision: tp / (tp + fp),
-    Recall: tp / (tp + fn)
-  };
-}
-
-/**
- * Compute regression metrics.
- * @param yPred Estimated target value.
- * @param yTrue Correct target value.
- */
-function getRegrMetrics(yPred: number[], yTrue: number[]) {
-  if (yPred.length !== yTrue.length) {
-    throw Error('Length of predictions must equal length of labels');
-  }
-
-  const yTrueMean: number = (
-    yTrue.reduce((acc, cur) => acc + cur) / yTrue.length
-  );
-
-  // Total sum of squares
-  let tss = 0;
-  // Residual sum of squares
-  let rss = 0;
-  for (let i = 0; i < yPred.length; i++) {
-    tss += (yTrue[i] - yTrueMean) ** 2;
-    rss += (yTrue[i] - yPred[i]) ** 2;
-  }
-
-  return {
-    'R2 Score': 1 - rss / tss
-  };
-}
 // Generating random indexes for centroids
 // Assigning generated numbers to an array
 function randArray(a, b, clustercount) {
@@ -125,8 +64,6 @@ function getRandomInt(min, max) {
 export {
   color,
   getLoss,
-  getClfMetrics,
-  getRegrMetrics,
   randArray,
   getRandomInt
 };
