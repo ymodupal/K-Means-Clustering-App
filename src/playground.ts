@@ -86,6 +86,10 @@ let metricList = [];
  */
 function makeGUI() {
   d3.select('#start-button').on('click', () => {
+    if(!validateEpsilon() || !validateNeighbors()){
+      return;
+    }
+    
     isLoading(true);
     //remove previous centroids
     clearCentroidData();
@@ -93,23 +97,7 @@ function makeGUI() {
     // initializing input parameters for K Means method
     let inputData = get2dArray(testData);
     let noOfClusters = parseInt(state.clusters.toString());
-    let seedForKmeans = utils.getRandomInt(0, testData.length - 1);
   
-
-    // K Means Clustering algorithm
-    let ans = kmeans(inputData, noOfClusters, 
-      { seed: seedForKmeans});
-    
-    // set index for resultant clusters 
-    setClusterIndexes(ans.clusters);
-    
-    let mean_square_error = 0;
-    let iterations = ans.iterations;
-    ans.centroids.forEach((item, idx) => {
-      testData.push(Get2dPoint(item.centroid[0], item.centroid[1], 1, idx, true));
-      mean_square_error += item.error;
-    });
-
     //**** Initial centres ****//
     let centroidIndexes = utils.randArray(0, testData.length-1, state.clusters);
 
@@ -117,10 +105,28 @@ function makeGUI() {
     centroidIndexes.forEach(item => {
         var cPt = testData[item];
         centroidArray.push([cPt.x,cPt.y]);
-        testData.push(Get2dPoint(cPt.x, cPt.y, 1, 9, false)); 
     });
     //**** Initial centres - ends ****//
 
+    // K Means algorithm result
+    let kmeansResult = kmeans(inputData, noOfClusters, { initialization: centroidArray});
+    
+    // set index for resultant clusters 
+    setClusterIndexes(kmeansResult.clusters);
+    
+    let mean_square_error = 0;
+    let iterations = kmeansResult.iterations;
+    kmeansResult.centroids.forEach((item, idx) => {
+      //heighlight cluster centroids in color
+      testData.push(Get2dPoint(item.centroid[0], item.centroid[1], 1, idx, true));
+      mean_square_error += item.error;
+    });
+
+    //Show initial centroids in black color
+    centroidIndexes.forEach(item => {
+      var cPt = testData[item];
+      testData.push(Get2dPoint(cPt.x, cPt.y, 1, 9, false)); 
+    });
     // *** Display metrics ****//
     updateMetrics(false, mean_square_error,iterations);
 
@@ -388,6 +394,64 @@ function cloneInputData(inputData: number[][]) {
 
   return result;
 }
+
+function validateEpsilon() {
+  let txtEpsilon = d3.select('.txt_epsilon').property("value");
+  let epsilon = parseFloat(txtEpsilon);
+
+  if(isNaN(epsilon) || epsilon < 0.1 || epsilon > 3.0) {
+    d3.select('.txt_epsilon').style("border", "1px solid red");
+    return false;
+  }
+  else {
+    d3.select('.txt_epsilon').style("border", "1px solid rgb(118, 118, 118)");
+    return true;
+  }
+}
+
+function validateNeighbors() {
+  let txtNeighbors = d3.select('.txt_neighborPoints').property("value");
+  let neighbors = parseInt(txtNeighbors);
+
+  if(isNaN(neighbors) || neighbors < 2 || neighbors > 20) {
+    d3.select('.txt_neighborPoints').style("border", "1px solid red");
+    return false;
+  }
+  else {
+    d3.select('.txt_neighborPoints').style("border", "1px solid rgb(118, 118, 118)");
+    return true;
+  }
+}
+
+d3.select('.txt_epsilon').on('input', function(eventArgs) {
+  let textbox = <any>this;
+  textbox.value = textbox.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');
+
+  let epsilon = parseFloat(textbox.value);
+
+  if(isNaN(epsilon) || epsilon < 0.1 || epsilon > 3.0) {
+    d3.select('.txt_epsilon').style("border", "1px solid red");
+    return;
+  }
+  else {
+    d3.select('.txt_epsilon').style("border", "1px solid rgb(118, 118, 118)");
+  }
+});
+
+d3.select('.txt_neighborPoints').on('input', function(eventArgs) {
+  let textbox = <any>this;
+  textbox.value = textbox.value.replace(/[^0-9]/g, '').replace(/(\..*?)\..*/g, '$1');
+
+  let neighbors = parseInt(textbox.value);
+
+  if(isNaN(neighbors) || neighbors < 2 || neighbors > 20) {
+    d3.select('.txt_neighborPoints').style("border", "1px solid red");
+    return;
+  }
+  else {
+    d3.select('.txt_neighborPoints').style("border", "1px solid rgb(118, 118, 118)");
+  }
+});
 
 drawDatasetThumbnails();
 makeGUI();
