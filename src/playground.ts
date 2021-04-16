@@ -29,7 +29,7 @@ import kmeans from 'ml-kmeans';
 import * as dc from 'density-clustering';
 
 // Number of samples in per dataset
-const NUM_SAMPLES_CLASSIFY = 600;
+const NUM_SAMPLES_CLASSIFY = 500;
 // Size of the heatmaps.
 const SIDE_LENGTH = 300;
 // # of points per direction.
@@ -86,7 +86,7 @@ let metricList = [];
  */
 function makeGUI() {
   d3.select('#start-button').on('click', () => {
-    if(!validateEpsilon() || !validateNeighbors()){
+    if((!validateEpsilon() && !validateNeighbors()) || !validateEpsilon() || !validateNeighbors()){
       return;
     }
     
@@ -125,7 +125,7 @@ function makeGUI() {
     //Show initial centroids in black color
     centroidIndexes.forEach(item => {
       var cPt = testData[item];
-      testData.push(Get2dPoint(cPt.x, cPt.y, 1, 9, false)); 
+      testData.push(Get2dPoint(cPt.x, cPt.y, 1, 9, true)); 
     });
     // *** Display metrics ****//
     updateMetrics(false, mean_square_error,iterations);
@@ -413,7 +413,7 @@ function validateNeighbors() {
   let txtNeighbors = d3.select('.txt_neighborPoints').property("value");
   let neighbors = parseInt(txtNeighbors);
 
-  if(isNaN(neighbors) || neighbors < 2 || neighbors > 20) {
+  if(isNaN(neighbors) || neighbors < 2 || neighbors > 100) {
     d3.select('.txt_neighborPoints').style("border", "1px solid red");
     return false;
   }
@@ -444,7 +444,7 @@ d3.select('.txt_neighborPoints').on('input', function(eventArgs) {
 
   let neighbors = parseInt(textbox.value);
 
-  if(isNaN(neighbors) || neighbors < 2 || neighbors > 20) {
+  if(isNaN(neighbors) || neighbors < 2 || neighbors > 100) {
     d3.select('.txt_neighborPoints').style("border", "1px solid red");
     return;
   }
