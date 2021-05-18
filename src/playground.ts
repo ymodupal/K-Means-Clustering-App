@@ -125,7 +125,7 @@ function makeGUI() {
     //Show initial centroids in black color
     centroidIndexes.forEach(item => {
       var cPt = testData[item];
-      testData.push(Get2dPoint(cPt.x, cPt.y, 1, 9, true)); 
+      testData.push(Get2dPoint(cPt.x, cPt.y, 1, 20, true)); 
     });
     // *** Display metrics ****//
     updateMetrics(false, mean_square_error,iterations);
@@ -376,7 +376,7 @@ function DensityScan(inputData: number[][]) {
 
   if (missingData != undefined && missingData.length > 0) {
     missingData.forEach(cPt => {
-      dbScanPoints.push(Get2dPoint(cPt[0], cPt[1], 1, 9, false));
+      dbScanPoints.push(Get2dPoint(cPt[0], cPt[1], 1, 20, false));
     });
   }
 

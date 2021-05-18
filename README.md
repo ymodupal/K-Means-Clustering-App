@@ -2,7 +2,7 @@
 
 ## Description
 
-Machine learning playground is an interactive visualization of K-Means Clustering, written in
+Machine learning playground is an interactive visualization of K-Means Clustering and DBSCAN algorithms, written in
 TypeScript using d3.js. 
 
 This playgound is inspired by [Tensorflow - Neural Network Playgound](https://playground.tensorflow.org/).
