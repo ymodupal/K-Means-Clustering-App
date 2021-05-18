@@ -39,8 +39,8 @@ limitations under the License.
     </a>
     <!-- Header -->
     <header>
-        <h1 class="l--page">Tinker With different <b> Clustering Algorithms</b> <span class="optional">Right here </span>in the
-            Browser.</h1>
+        <h1 class="l--page">Tinker with <b> Clustering Algorithms</b> <span class="optional">right here </span>in the
+            browser.</h1>
     </header>
     <!-- Body -->
     <!-- Top Controls -->
@@ -66,11 +66,11 @@ limitations under the License.
               </div>
             </div>
             <div class="control ui-epsilon">
-              <label for="epsilon">DB Scan - Epsilon</label>
+              <label for="epsilon">DB Scan - Epsilon(radius) of neighborhood</label>
               <input required type="text" class="txt_epsilon" id="epsilon" name="epsilon" placeholder="0.1<Epsilon<3" min="0.1" max="3" >
             </div>
             <div class="control ui-neighbors">
-              <label for="neighbors">DB Scan - Points in neighborhood</label>
+              <label for="neighbors">DB Scan - Minimum points in neighborhood</label>
               <input required type="text" class="txt_neighborPoints" id="neighborPoints" name="neighborCount" placeholder="Integer range [2-100]" min="2" max="100">
             </div>
         </div>
@@ -130,7 +130,7 @@ limitations under the License.
         <div class="column output">
           <div class="clusterView" style="display: flex;">
             <div>
-              <h4 class="chart-header">K Means</h4>
+              <h4 class="chart-header">K Means clustering algorithm - Result</h4>
               <div id="kmeans-heatmap" class="output-viz">
               </div>
             </div>
@@ -147,7 +147,7 @@ limitations under the License.
         <div class="column output">
           <div class="clusterView" style="display: flex;">
             <div>
-              <h4>Density Based (DB Scan)</h4>
+              <h4>DBSCAN clustering algorithm - Result</h4>
               <div id="dbscan-heatmap" class="main-viz">
               </div>
             </div>
