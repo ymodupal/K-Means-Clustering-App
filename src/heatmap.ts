@@ -26,9 +26,10 @@ export interface HeatMapSettings {
 /** Number of different shades (colors) when drawing a gradient heatmap */
 const NUM_SHADES = 30;
 
-const colorsPreset = ['#f59322', '#0877bd', '#c27ba0', '#8e7cc3', '#6d9eeb', '#76a5af', '#93c47d', '#ff4d4d', '#664d00', '#c1690b',
-                      '#ff00bf', '#00b300', '#cc3399', '#ac3939', '#009933', '#ff8000', '#00cccc', '#6666ff', '#5c5c8a', '#000000'];
-const centroidColorPreset = ['#e3861b', '#0853bd', '#b83b6f', '#3b12b3', '#266fe0', '#1e6675', '#568a3f', '#8f5f2e'];
+const colorsPreset = ['#f59322', '#0877bd', '#c27ba0', '#8e7cc3', '#6d9eeb', '#76a5af', '#93c47d', '#ff4d4d', 
+                      '#664d00', '#c1690b', '#ff00bf', '#00b300', '#cc3399', '#ac3939', '#009933', '#ff8000', 
+                      '#00cccc', '#6666ff', '#5c5c8a', '#000000'];
+const centroidColorPreset = ['#e3861b', '#0853bd', '#b83b6f', '#3b12b3', '#266fe0', '#1e6675', '#568a3f', '#ff1a1a'];
 
 /**
  * Draws a heatmap using canvas. Used for showing the learned decision
