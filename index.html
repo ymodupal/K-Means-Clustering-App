@@ -154,18 +154,29 @@ limitations under the License.
           </div>
         </div>
       </div>
-      <!-- Article -->
-       <article>
-        <div class="l--body">
-        </div>
-       </article>
-    
-      <!-- More -->
-      <div class="more" style="display: none;">
-        <button class="mdl-button mdl-js-button mdl-button--fab">
-          <i class="material-icons">keyboard_arrow_down</i>
-        </button>
-      </div>
-      <script src="bundle.js"></script>
+
+  <!-- Article -->
+  <article id="article-text">
+    <div class="l--body">
+      <h2>What is a Clustering Playground?</h2>
+      <p>
+        This is an interactive webspace to learn and observe the functionality of K-Means and DBSCAN clustering algorithms. This work has been inspired by <a href="https://playground.tensorflow.org/">TensorFlow playground</a>.
+      </p>
+    </div>
+
+    <div class="l--body">
+      <h2>How to use it?</h2>
+      <p>
+         Here is a simple guide to know about this playground features. User can select one of six dataset patterns available.
+         One can regenerate the data any number of times with optional noise level before applying clustering algorithms. 
+         The 'clusterize' button is common for both algorithms together. To run the clustering algorithms, user must provide input parameters otherwise it will highlight missing values in red color. 
+         Epsilon, Minimum points in neighborhood are mandatory values to be supplied for DBSCAN algorithm but K-Means algorithm takes 2 as default K Value.
+      </p>
+      <p>
+        Finally, you can run the algorithms any number of times with valid input variables and observe the resultant clusters of each execution. K-Means algorithm shows the metrics of every execution and DBSCAN do not have specific metrics to display.
+     </p>
+    </div>
+  </article>
+  <script src="bundle.js"></script>
 </body>
 </html>

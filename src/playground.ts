@@ -110,7 +110,7 @@ function makeGUI() {
 
     // K Means algorithm result
     let kmeansResult = kmeans(inputData, noOfClusters, { initialization: centroidArray});
-    
+    console.log(kmeansResult);
     // set index for resultant clusters 
     setClusterIndexes(kmeansResult.clusters);
     

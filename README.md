@@ -8,7 +8,7 @@ TypeScript using d3.js.
 This playgound is inspired by [Tensorflow - Neural Network Playgound](https://playground.tensorflow.org/).
 
 ## Deployment
-
+This application is available at https://ymodupal.github.io/
 
 ## Development
 
